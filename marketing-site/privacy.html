@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — appo</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-icon.svg">
+<style>
+:root { --bg:#0B0B14; --text-primary:#F5F5F7; --text-secondary:#A1A1AA; --violet:#8B5CF6; --fuchsia:#D946EF; --cyan:#22D3EE; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text-primary); background:var(--bg); line-height:1.7; }
+a { color: var(--cyan); }
+header { padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.logo-lockup { height:30px; }
+main { max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; }
+h1 { font-size: 34px; font-weight: 800; margin-bottom: 8px; }
+.updated { color: var(--text-secondary); font-size: 13px; margin-bottom: 40px; }
+h2 { font-size: 19px; margin-top: 36px; margin-bottom: 10px; }
+p, li { color: #D4D4D8; font-size: 15px; }
+ul { padding-left: 22px; margin-top: 8px; }
+li { margin-bottom: 6px; }
+.back { display:inline-block; margin-top:50px; font-size:14px; }
+table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); color: #D4D4D8; }
+th { color: var(--text-primary); }
+.placeholder { background: rgba(217,70,239,0.08); border: 1px solid rgba(217,70,239,0.25); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #F0ABFC; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header><a href="index.html"><img class="logo-lockup" src="assets/logo-lockup.svg" alt="appo"></a></header>
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: [DATE — fill in before launch]</p>
+
+  <p>This Policy explains what data appo (operated by Techtig) collects, why, and what choices you have. We collect the minimum needed to run the product.</p>
+
+  <h2>1. What We Collect</h2>
+  <table>
+    <tr><th>Data</th><th>Purpose</th><th>Source</th></tr>
+    <tr><td>Email, name</td><td>Account creation, login, communication</td><td>You, at signup</td></tr>
+    <tr><td>App descriptions &amp; generated code</td><td>Provide the core generation service</td><td>You, when using the generator</td></tr>
+    <tr><td>Subscription &amp; payment status</td><td>Billing, plan enforcement</td><td>Paddle (we never see your card number)</td></tr>
+    <tr><td>Usage data (credits used, actions taken)</td><td>Feature gating, product improvement</td><td>Automatically, as you use appo</td></tr>
+  </table>
+
+  <h2>2. Third Parties We Use</h2>
+  <ul>
+    <li><strong>Supabase</strong> — database, authentication, file storage.</li>
+    <li><strong>Google Gemini API</strong> — processes your app descriptions to generate code. Descriptions are sent to Google as part of each generation request.</li>
+    <li><strong>Paddle</strong> — payment processing. We never store your full card details.</li>
+    <li><strong>GitHub API</strong> (if you use One-Click GitHub Export) — only with your explicit authorization, to push code to a repository you choose.</li>
+  </ul>
+
+  <h2>3. Cookies</h2>
+  <p>We use a minimal set of cookies/local storage for essential site function (staying logged in, remembering your dark-mode preference and cookie-consent choice) and basic, privacy-respecting analytics. We do not use third-party advertising trackers.</p>
+
+  <h2>4. Your Rights</h2>
+  <ul>
+    <li><strong>Access &amp; export</strong> — request a copy of your data at any time.</li>
+    <li><strong>Correction</strong> — update your account details from Settings.</li>
+    <li><strong>Deletion</strong> — request full account and data deletion from Settings → Account, or by emailing us. We aim to complete deletion within 30 days.</li>
+  </ul>
+  <div class="placeholder">Fill in before launch: your actual data retention periods, the legal basis for processing (if serving EU/UK users, GDPR Article 6 basis), and your Data Protection Officer contact if one is required for your scale.</div>
+
+  <h2>5. Data Security</h2>
+  <p>Data is encrypted in transit (HTTPS) and at rest (via Supabase's managed Postgres). Access is restricted by role-based access control; admin actions are logged.</p>
+
+  <h2>6. Children</h2>
+  <p>appo is not directed at children under 16, and we do not knowingly collect data from them.</p>
+
+  <h2>7. Changes to This Policy</h2>
+  <p>We'll post updates here and, for material changes, notify you by email or in-app notice.</p>
+
+  <h2>8. Contact</h2>
+  <p>Privacy questions or data requests: <a href="mailto:techtig9@gmail.com">techtig9@gmail.com</a></p>
+
+  <a class="back" href="index.html">← Back to appo</a>
+</main>
+</body>
+</html>
