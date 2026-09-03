@@ -15,15 +15,15 @@ export default async function PublicPreviewPage({ params }: { params: { slug: st
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 text-center text-white">
+    <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 text-center text-ink">
       <img src="/logo-icon.svg" alt="" className="mb-6 h-14 w-14 rounded-2xl" />
       <h1 className="text-3xl font-bold">{app.name}</h1>
-      <p className="mt-2 text-slate-400">
+      <p className="mt-2 text-ink-secondary">
         v{app.version} · built for {app.platforms?.join(", ")}
       </p>
-      <div className="glass-card mt-8 w-full p-6 text-sm text-slate-300">
+      <div className="glass-card mt-8 w-full p-6 text-sm text-ink-secondary">
         This is a shared, read-only preview generated with{" "}
-        <a href="/" className="text-cyan-400 underline">
+        <a href="/" className="text-info underline">
           appo
         </a>
         . The live in-app Expo Snack preview is only available to the app&apos;s owner in their dashboard —

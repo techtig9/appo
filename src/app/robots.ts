@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 
-// Update BASE_URL to the real production domain before launch.
-const BASE_URL = "https://appo.app";
+function baseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://appo.app")
+  );
+}
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,9 +13,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard", "/admin", "/api"],
+        // `/auth/` is excluded alongside the obvious private areas: those
+        // URLs carry single-use authorization codes, and a crawler
+        // following one burns it before the user can.
+        disallow: ["/dashboard", "/admin", "/api", "/auth/", "/preview/"],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: `${baseUrl()}/sitemap.xml`,
   };
 }

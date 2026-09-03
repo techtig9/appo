@@ -1,54 +1,417 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { PricingTable } from "@/components/PricingTable";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { CookieConsent } from "@/components/CookieConsent";
 import { ChatbotWidget } from "@/components/ChatbotWidget";
+import { BuilderPreview } from "@/components/landing/BuilderPreview";
+import { Faq, FeatureGrid, LandingFooter, LandingHeader, Section, SectionHeading, StepList } from "@/components/landing/sections";
+import { TEMPLATE_CATALOG } from "@/lib/templates/catalog";
+import { renderTemplateThumbnail } from "@/lib/templates/thumbnail";
+import { CATEGORY_LABELS } from "@/lib/templates/types";
 
-const features = [
-  ["✦", "Describe your idea", "Start with plain language. Appo turns your product idea into an actionable app plan."],
-  ["◫", "Real app generation", "Generate a runnable React Native / Expo project instead of a static design mockup."],
-  ["⌘", "AI-powered refinement", "Keep talking to your project and ask Appo to add, change or improve features."],
-  ["◌", "Live preview", "See your generated app running while you build, including a phone-friendly workflow."],
-  ["</>", "Full code access", "Inspect and edit the generated project with the built-in code editor, then export it."],
-  ["↗", "Ship when ready", "Move from idea to a shareable, deployment-ready project without rebuilding everything from scratch."],
-];
+export const metadata: Metadata = {
+  title: "Appo — Build apps with AI. Ship ideas faster.",
+  description:
+    "Describe an app in plain language. Appo plans the product, generates a runnable project, and gives you a workspace to refine, version and deploy it.",
+  alternates: { canonical: "/" },
+};
 
-const examples = ["A modern habit tracker with streaks and reminders", "A marketplace for local handmade products", "A booking app for a fitness studio", "A personal finance dashboard with budgets"];
+/**
+ * The landing page.
+ *
+ * Structure follows the fifteen-section brief: navbar, hero, product
+ * preview, how it works, AI capabilities, builder showcase, templates,
+ * developer workflow, collaboration, deployment, analytics, pricing, FAQ,
+ * final CTA, footer.
+ *
+ * Two rules held throughout:
+ *  - Nothing claims a capability the product does not have. There are no
+ *    invented customer logos, no fabricated "10,000 developers" counters
+ *    and no review quotes, because none of those exist yet.
+ *  - The template strip is rendered from the real catalogue with the real
+ *    generated previews, so the marketing page and the product cannot
+ *    disagree about what is on offer.
+ */
+
+const FEATURED_TEMPLATES = TEMPLATE_CATALOG.filter((template) => template.featured).slice(0, 6);
 
 export default function LandingPage() {
   return (
-    <main className="overflow-hidden text-white">
-      <header className="sticky top-0 z-50 border-b border-white/[.06] bg-[#08080f]/75 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5"><img src="/logo-icon.svg" alt="" className="h-8 w-8 rounded-xl"/><span className="text-lg font-semibold tracking-tight">appo</span></Link>
-          <nav className="hidden items-center gap-7 text-sm text-slate-400 md:flex"><a href="#features" className="hover:text-white">Features</a><a href="#workflow" className="hover:text-white">How it works</a><a href="#pricing" className="hover:text-white">Pricing</a><a href="#faq" className="hover:text-white">FAQ</a></nav>
-          <div className="flex items-center gap-2"><Link href="/login" className="hidden rounded-full px-3.5 py-2 text-sm text-slate-300 hover:text-white sm:block">Log in</Link><Link href="/signup" className="btn-accent px-4 py-2.5 text-sm">Start building</Link></div>
-        </div>
-      </header>
+    <>
+      <LandingHeader />
 
-      <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 sm:px-6 sm:pt-24 lg:pb-28">
-        <div className="absolute left-1/2 top-0 -z-10 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-violet/15 blur-[140px]"/>
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet/20 bg-violet/10 px-3.5 py-1.5 text-xs font-medium text-violet-200"><span className="h-1.5 w-1.5 rounded-full bg-violet"/> AI app building, simplified</div>
-          <h1 className="mt-7 text-5xl font-bold leading-[1.03] tracking-[-.045em] sm:text-7xl">Turn an idea into a <span className="gradient-text">real app.</span></h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">Describe what you want to build. Appo helps plan the product, generate a runnable app and give you a workspace to refine the result with AI.</p>
-          <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-white/10 bg-[#10101a]/90 p-2 shadow-2xl shadow-violet/10 backdrop-blur-xl"><div className="rounded-[22px] border border-white/5 bg-white/[.025] p-4 text-left"><div className="flex items-start gap-3"><div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet/15 text-violet-200">✦</div><p className="min-h-12 flex-1 text-sm leading-6 text-slate-300">Build a modern booking app for a fitness studio with customer accounts, class schedules, bookings, reminders and an admin dashboard.</p></div><div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3"><span className="text-[11px] text-slate-600">Describe your app in plain language</span><Link href="/signup" className="btn-accent px-4 py-2 text-xs">Build with AI →</Link></div></div></div>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-600"><span>✓ Runnable project</span><span>✓ Live preview</span><span>✓ Full code access</span><span>✓ AI refinement</span></div>
-        </div>
-      </section>
+      <main id="main">
+        {/* 2 — Hero */}
+        <section className="relative overflow-hidden">
+          {/* One restrained wash behind the hero. Not on every section. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full opacity-[0.14] blur-[120px]"
+            style={{ background: "var(--app-gradient-brand)" }}
+          />
 
-      <section id="workflow" className="border-y border-white/[.06] bg-white/[.015] py-20"><div className="mx-auto max-w-7xl px-5 sm:px-6"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-semibold uppercase tracking-[.2em] text-violet-300">How it works</p><h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">From prompt to product, without the blank page.</h2><p className="mt-3 text-sm leading-6 text-slate-500">Appo keeps the experience simple while giving you room to go deeper when you need it.</p></div><div className="mt-12 grid gap-4 md:grid-cols-3">{[["01","Describe","Tell Appo what you want to build and what the app needs to do."],["02","Generate","Appo analyzes the idea and creates a runnable project around it."],["03","Refine & ship","Preview, edit with AI or code, then keep iterating as your product grows."]].map(([n,t,b])=><RevealOnScroll key={n}><div className="rounded-3xl border border-white/10 bg-[#0e0e17] p-6"><span className="text-xs font-semibold text-violet-300">{n}</span><h3 className="mt-10 text-xl font-semibold">{t}</h3><p className="mt-2 text-sm leading-6 text-slate-500">{b}</p></div></RevealOnScroll>)}</div></div></section>
+          <div className="app-container relative pb-14 pt-14 sm:pt-20">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-caption text-ink-secondary">
+                <span className="h-1.5 w-1.5 rounded-full bg-ai" aria-hidden="true" />
+                Multi-provider AI generation with automatic failover
+              </p>
 
-      <section id="features" className="mx-auto max-w-7xl px-5 py-20 sm:px-6"><div className="max-w-2xl"><p className="text-xs font-semibold uppercase tracking-[.2em] text-violet-300">Built for the whole journey</p><h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Everything you need to keep building.</h2></div><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{features.map(([icon,title,body],i)=><RevealOnScroll key={title} delayMs={i*50}><div className="group rounded-3xl border border-white/10 bg-white/[.025] p-6 transition hover:-translate-y-1 hover:border-violet/20 hover:bg-violet/[.035]"><div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[.04] text-sm text-violet-200">{icon}</div><h3 className="mt-5 font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-500">{body}</p></div></RevealOnScroll>)}</div></section>
+              <h1 className="mt-6 text-balance text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[3.5rem] lg:text-hero">
+                Build apps with AI.
+                <br />
+                <span className="gradient-text">Ship ideas faster.</span>
+              </h1>
 
-      <section className="mx-auto max-w-7xl px-5 pb-20 sm:px-6"><div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[.045] to-white/[.015] p-6 sm:p-10"><div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-violet-300">Try an idea</p><h2 className="mt-3 text-3xl font-bold tracking-tight">Start from what you already have in your head.</h2><p className="mt-4 text-sm leading-6 text-slate-500">You don't need the perfect prompt. Appo can help turn a rough idea into a more structured starting point.</p><Link href="/signup" className="btn-accent mt-6 inline-flex text-sm">Create an app</Link></div><div className="grid gap-2">{examples.map((example)=><Link key={example} href="/signup" className="rounded-2xl border border-white/8 bg-black/10 px-4 py-3 text-sm text-slate-400 transition hover:border-violet/20 hover:bg-violet/5 hover:text-white">“{example}” <span className="float-right text-slate-600">→</span></Link>)}</div></div></div></section>
+              <p className="mx-auto mt-5 max-w-xl text-body-lg leading-relaxed text-ink-secondary">
+                Describe what you want to build. Appo plans the product, generates a runnable project, and gives you a
+                real workspace to refine, version and deploy it.
+              </p>
 
-      <section id="pricing" className="border-y border-white/[.06] bg-white/[.015] py-16"><div className="mx-auto max-w-7xl px-5 sm:px-6"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-semibold uppercase tracking-[.2em] text-violet-300">Pricing</p><h2 className="mt-3 text-3xl font-bold">Start free. Upgrade when your ideas grow.</h2><p className="mt-3 text-sm text-slate-500">Use the same pricing logic already powering Appo's existing credit and feature gates.</p></div><PricingTable /></div></section>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/signup"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand px-6 text-body-lg font-medium text-brand-contrast transition-colors duration-micro hover:bg-brand-hover sm:w-auto"
+                >
+                  Start Building Free
+                </Link>
+                <Link
+                  href="/dashboard/templates"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-line bg-surface px-6 text-body-lg font-medium text-ink transition-colors duration-micro hover:border-line-strong sm:w-auto"
+                >
+                  Explore Templates
+                </Link>
+              </div>
 
-      <section id="faq" className="mx-auto max-w-4xl px-5 py-20 sm:px-6"><div className="text-center"><p className="text-xs font-semibold uppercase tracking-[.2em] text-violet-300">FAQ</p><h2 className="mt-3 text-3xl font-bold">Questions, answered.</h2></div><div className="mt-10 divide-y divide-white/[.08] rounded-3xl border border-white/10 bg-white/[.02]">{[["What does Appo generate?","Appo currently generates runnable React Native / Expo projects, with live preview and full code access."],["Can I edit the generated code?","Yes. The existing project includes a Monaco-powered editor and ZIP export workflow."],["Do I need to be a developer?","No. The core workflow starts with a plain-language description. Developers can still inspect and edit the generated project."],["Can I keep improving an app after generation?","Yes. The product is designed around iterative generation rather than a one-time export."]].map(([q,a])=><details key={q} className="group p-5"><summary className="cursor-pointer list-none text-sm font-medium text-slate-200">{q}<span className="float-right text-slate-600 group-open:rotate-45">+</span></summary><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">{a}</p></details>)}</div></section>
+              <p className="mt-4 text-caption text-ink-muted">
+                Free plan includes enough credits for a full app generation. No card required.
+              </p>
+            </div>
 
-      <footer className="border-t border-white/[.06] py-10"><div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 text-xs text-slate-600 sm:px-6 md:flex-row md:items-center md:justify-between"><div><div className="flex items-center gap-2 text-sm font-semibold text-slate-300"><img src="/logo-icon.svg" alt="" className="h-6 w-6 rounded-lg"/> appo</div><p className="mt-2">Built by Techtig</p></div><div className="flex gap-5"><Link href="/terms" className="hover:text-slate-300">Terms</Link><Link href="/privacy" className="hover:text-slate-300">Privacy</Link><a href="#faq" className="hover:text-slate-300">Support</a></div></div></footer>
-      <CookieConsent /><ChatbotWidget />
-    </main>
+            {/* 3 — Real product preview */}
+            <div className="mx-auto mt-14 max-w-5xl">
+              <BuilderPreview />
+            </div>
+          </div>
+        </section>
+
+        {/* 4 — How it works */}
+        <Section id="how" bordered muted>
+          <SectionHeading
+            eyebrow="How it works"
+            title="From a sentence to a running project"
+            description="Three steps, and you can stop at any of them and keep the code."
+          />
+          <StepList
+            steps={[
+              {
+                number: "01",
+                title: "Describe it",
+                body: "Write what the app should do in plain language. Appo asks a few targeted follow-up questions instead of a 40-field form.",
+              },
+              {
+                number: "02",
+                title: "Appo builds it",
+                body: "The request is planned, an architecture is chosen, and a complete project is generated — then validated before you ever see it.",
+              },
+              {
+                number: "03",
+                title: "Refine and ship",
+                body: "Preview it, ask for changes in conversation, compare versions, roll back, and deploy when it is ready.",
+              },
+            ]}
+          />
+        </Section>
+
+        {/* 5 — AI capabilities */}
+        <Section id="capabilities" bordered>
+          <SectionHeading
+            eyebrow="AI engine"
+            title="Routing built for real workloads, not demos"
+            description="Four providers behind one interface, chosen per request on complexity, availability and cost."
+          />
+          <FeatureGrid
+            items={[
+              {
+                title: "Automatic failover",
+                body: "Groq, then Cerebras, then OpenRouter, with Claude reserved for genuinely large tasks. A rate limit on one provider is not an outage for you.",
+              },
+              {
+                title: "Bounded retries",
+                body: "Transient faults get one more attempt; a 400 or a bad key does not, because retrying it only wastes your time.",
+              },
+              {
+                title: "Hard timeouts",
+                body: "Every provider call carries an explicit budget, so a stalled connection surfaces as an error you can act on rather than a spinner.",
+              },
+              {
+                title: "Output validation",
+                body: "Generated files are checked for unsafe paths, oversized output and embedded credentials before anything is stored or downloadable.",
+              },
+              {
+                title: "Cost-aware routing",
+                body: "Task size is estimated from your request, so a small change does not get billed at large-model prices.",
+              },
+              {
+                title: "You are never charged for a failure",
+                body: "Credits are reserved atomically and refunded automatically if a generation does not complete.",
+              },
+            ]}
+          />
+        </Section>
+
+        {/* 6 — Builder showcase */}
+        <Section bordered muted>
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <SectionHeading
+                eyebrow="The builder"
+                align="left"
+                title="A workspace, not a chat box"
+                description="Files on the left, the AI and your code in the middle, a live preview on the right. Everything you need to actually finish something."
+              />
+              <ul className="mt-8 space-y-3">
+                {[
+                  "Conversational edits that preserve the rest of your project",
+                  "Version history with a diff, and one-click rollback",
+                  "Full code access and a ZIP export you own",
+                  "Real generation stages — never a fake progress bar",
+                  "Command palette and keyboard shortcuts throughout",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-small leading-relaxed text-ink-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="mt-0.5 shrink-0 text-brand">
+                      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.14" />
+                      <path d="m7.5 12.5 3 3 6-6.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <RevealOnScroll>
+              <BuilderPreview />
+            </RevealOnScroll>
+          </div>
+        </Section>
+
+        {/* 7 — Templates */}
+        <Section id="templates" bordered>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionHeading
+              align="left"
+              eyebrow="Templates"
+              title={`${TEMPLATE_CATALOG.length} starting points, not five`}
+              description="Every template comes with its own screens, architecture and seed prompt. Start from one and change anything."
+            />
+            <Link href="/dashboard/templates" className="text-small font-medium text-brand underline-offset-4 hover:underline">
+              Browse all {TEMPLATE_CATALOG.length} →
+            </Link>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURED_TEMPLATES.map((template, index) => (
+              <RevealOnScroll key={template.slug} delayMs={index * 50}>
+                <article className="card card-interactive group h-full overflow-hidden">
+                  <div className="overflow-hidden border-b border-line bg-canvas-subtle">
+                    {/* The real generated preview, inlined so the landing
+                        page needs no extra request per card. */}
+                    <div
+                      className="transition-transform duration-normal ease-out group-hover:scale-[1.03] [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+                      dangerouslySetInnerHTML={{ __html: renderTemplateThumbnail(template) }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="badge">{CATEGORY_LABELS[template.category]}</span>
+                      <span className="text-caption text-ink-muted">{template.platforms.join(" · ")}</span>
+                    </div>
+                    <h3 className="mt-3 text-body font-semibold text-ink">{template.name}</h3>
+                    <p className="mt-1.5 line-clamp-2 text-small leading-relaxed text-ink-secondary">{template.description}</p>
+                  </div>
+                </article>
+              </RevealOnScroll>
+            ))}
+          </div>
+        </Section>
+
+        {/* 8 — Developer workflow */}
+        <Section bordered muted>
+          <SectionHeading
+            eyebrow="Developer workflow"
+            title="It behaves like a tool you already know"
+            description="Generated code is yours. Nothing here locks it behind an editor you cannot leave."
+          />
+          <FeatureGrid
+            columns={4}
+            items={[
+              { title: "File explorer", body: "Browse and open every file in the generated project." },
+              { title: "Version history", body: "Each generation and edit is an immutable, checksummed release." },
+              { title: "GitHub export", body: "Push a generated project straight to a repository you control." },
+              { title: "ZIP download", body: "Take the whole project with you at any time, on any paid plan." },
+            ]}
+          />
+        </Section>
+
+        {/* 9 — Collaboration */}
+        <Section bordered>
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <SectionHeading
+              align="left"
+              eyebrow="Collaboration"
+              title="Bring the rest of the team in"
+              description="Invite people as editors or viewers. Permissions are enforced on the server, not hidden in the interface — a viewer cannot make a change even by calling the API directly."
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { title: "Roles", body: "Owner, editor and viewer, checked on every write." },
+                { title: "Invitations", body: "Emailed, single-use, and expiring after seven days." },
+                { title: "Activity", body: "A record of who changed what, and when." },
+                { title: "Sharing", body: "A public preview link per project, revocable at any time." },
+              ].map((item) => (
+                <div key={item.title} className="card p-4">
+                  <h3 className="text-small font-semibold text-ink">{item.title}</h3>
+                  <p className="mt-1.5 text-caption leading-relaxed text-ink-secondary">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* 10 — Deployment */}
+        <Section bordered muted>
+          <SectionHeading
+            eyebrow="Deployment"
+            title="Ship it, and know exactly what shipped"
+            description="Every release is a checksummed artifact tied to a version. Status is reported honestly at each stage."
+          />
+          <div className="mx-auto mt-10 flex max-w-3xl flex-wrap items-center justify-center gap-2">
+            {["Queued", "Building", "Testing", "Deploying", "Live"].map((stage, index, all) => (
+              <div key={stage} className="flex items-center gap-2">
+                <span
+                  className={cnStage(index, all.length)}
+                >
+                  {stage}
+                </span>
+                {index < all.length - 1 ? <span className="h-px w-4 bg-line sm:w-8" aria-hidden="true" /> : null}
+              </div>
+            ))}
+          </div>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-caption leading-relaxed text-ink-muted">
+            Web deployment is available today. Native builds are recorded and tracked, but Appo does not submit to the
+            App Store or Play Store on your behalf — that needs your own developer account, and we will not claim
+            otherwise.
+          </p>
+        </Section>
+
+        {/* 11 — Analytics */}
+        <Section bordered>
+          <SectionHeading
+            eyebrow="Analytics"
+            title="Numbers from your account, not a mock-up"
+            description="Generations, success and failure rates, credit consumption, deployments and template usage — all computed from what actually happened."
+          />
+          <FeatureGrid
+            columns={4}
+            items={[
+              { title: "Usage", body: "Credits consumed, by action and by day." },
+              { title: "Reliability", body: "Generation success and failure counts over time." },
+              { title: "Deployments", body: "What went live, when, and from which version." },
+              { title: "Projects", body: "Activity across every app in your workspace." },
+            ]}
+          />
+        </Section>
+
+        {/* 12 — Pricing */}
+        <Section id="pricing" bordered muted>
+          <SectionHeading
+            eyebrow="Pricing"
+            title="Start free. Upgrade when it earns it."
+            description="Every plan includes a monthly credit allowance. Failed generations are never charged."
+          />
+          <div className="mt-12">
+            <PricingTable />
+          </div>
+        </Section>
+
+        {/* 13 — FAQ */}
+        <Section id="faq" bordered>
+          <SectionHeading eyebrow="FAQ" title="Questions worth asking first" />
+          <Faq
+            items={[
+              {
+                question: "Do I own the code Appo generates?",
+                answer:
+                  "Yes. Generated projects are yours. On any paid plan you can download the full source as a ZIP or push it to your own GitHub repository, and nothing in it depends on Appo continuing to exist.",
+              },
+              {
+                question: "What happens if a generation fails?",
+                answer:
+                  "You are not charged. Credits are reserved before the work starts and automatically refunded if it does not complete, so a provider outage never costs you anything.",
+              },
+              {
+                question: "Which AI models does Appo use?",
+                answer:
+                  "Appo routes across Groq, Cerebras and OpenRouter, with Anthropic's Claude reserved for genuinely large or complex tasks. Routing considers task size, provider availability and cost — if one provider is rate limited, the request moves to the next automatically.",
+              },
+              {
+                question: "Can Appo publish my app to the App Store?",
+                answer:
+                  "Not today. Web deployment works end to end. Native builds are recorded and tracked in Appo, but store submission requires your own Apple or Google developer account, and we would rather say so than imply otherwise.",
+              },
+              {
+                question: "What happens to my projects if I cancel?",
+                answer:
+                  "Nothing is deleted. Your account moves to the Free plan and your projects stay exactly where they are. You can export them at any time before or after cancelling.",
+              },
+              {
+                question: "How is my data handled?",
+                answer:
+                  "Projects are private by default and protected by row-level security in the database, so one account cannot read another's data even through the API. You can export everything or delete your account permanently from Settings.",
+              },
+            ]}
+          />
+        </Section>
+
+        {/* 14 — Final CTA */}
+        <Section bordered muted>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-balance text-section font-semibold tracking-tight text-ink sm:text-[1.75rem]">
+              Describe your app. See it running.
+            </h2>
+            <p className="mt-3 text-body leading-relaxed text-ink-secondary">
+              The free plan includes enough credits for a complete generation, so you can judge the output before
+              deciding anything.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/signup"
+                className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand px-6 text-body-lg font-medium text-brand-contrast transition-colors duration-micro hover:bg-brand-hover sm:w-auto"
+              >
+                Start Building Free
+              </Link>
+              <Link
+                href="/dashboard/templates"
+                className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-line bg-surface px-6 text-body-lg font-medium text-ink transition-colors duration-micro hover:border-line-strong sm:w-auto"
+              >
+                Explore Templates
+              </Link>
+            </div>
+          </div>
+        </Section>
+      </main>
+
+      <LandingFooter />
+      <CookieConsent />
+      <ChatbotWidget />
+    </>
   );
+}
+
+/** The deployment strip's first stage is emphasised; the rest are neutral. */
+function cnStage(index: number, total: number): string {
+  const base = "rounded-md border px-3 py-1.5 text-caption font-medium";
+  if (index === total - 1) return `${base} border-success/40 bg-success-subtle text-success`;
+  if (index === 0) return `${base} border-brand-border bg-brand-subtle text-brand`;
+  return `${base} border-line bg-surface text-ink-secondary`;
 }

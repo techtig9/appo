@@ -1,3 +1,6 @@
+import { fetchWithTimeout, isRetryableStatus, withRetry, UpstreamTimeoutError } from "./http/fetch-with-timeout";
+import { redactString } from "./logger";
+
 export interface GeneratorAnswers {
   platforms: ("ios" | "android" | "web")[];
   coreScreens: string[];
@@ -38,6 +41,36 @@ const PROVIDER_NAMES: Record<Provider, string> = {
   openrouter: "OpenRouter",
   anthropic: "Anthropic Claude",
 };
+
+/**
+ * Per-call ceilings. Generation legitimately takes tens of seconds on a
+ * large project, so its budget is generous; chat must feel interactive and
+ * gets a much tighter one. Without these, `fetch` waits forever and a
+ * single stalled provider connection holds the request open until the
+ * platform kills the whole invocation — which the user experiences as a
+ * generation that never finishes and never errors.
+ */
+const GENERATION_TIMEOUT_MS = 120_000;
+const CHAT_TIMEOUT_MS = 30_000;
+
+/** Attempts per provider before failing over to the next one. */
+const ATTEMPTS_PER_PROVIDER = 2;
+
+/**
+ * Carries the HTTP status so the retry/failover decision is made on facts
+ * rather than by pattern-matching an error string.
+ */
+export class ProviderError extends Error {
+  constructor(
+    public readonly provider: Provider,
+    message: string,
+    public readonly status?: number,
+    public readonly retryable = false
+  ) {
+    super(message);
+    this.name = "ProviderError";
+  }
+}
 
 function env(name: string): string | undefined {
   const value = process.env[name]?.trim();
@@ -117,13 +150,23 @@ function isLimitOrAvailabilityError(error: unknown): boolean {
 async function readJsonResponse(res: Response, provider: Provider): Promise<unknown> {
   const text = await res.text();
   if (!res.ok) {
-    const detail = text.slice(0, 500).replace(/\s+/g, " ");
-    throw new Error(`${PROVIDER_NAMES[provider]} API error: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ""}`);
+    // Provider error bodies routinely echo the request back, API key
+    // header included. Redact before this string is allowed anywhere near
+    // a log sink or an error response.
+    const detail = redactString(text.slice(0, 300).replace(/\s+/g, " "));
+    throw new ProviderError(
+      provider,
+      `${PROVIDER_NAMES[provider]} API error: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ""}`,
+      res.status,
+      isRetryableStatus(res.status)
+    );
   }
   try {
     return JSON.parse(text);
   } catch {
-    throw new Error(`${PROVIDER_NAMES[provider]} returned invalid JSON.`);
+    // Malformed JSON from an otherwise-200 response is usually a truncated
+    // stream; one more attempt is worth it before failing over.
+    throw new ProviderError(provider, `${PROVIDER_NAMES[provider]} returned invalid JSON.`, res.status, true);
   }
 }
 
@@ -133,23 +176,29 @@ function parseGeneratedProject(value: unknown, provider: Provider): GeneratedPro
     ? data?.content?.find((part: any) => part?.type === "text")?.text ?? ""
     : data?.choices?.[0]?.message?.content ?? "";
 
-  if (!text) throw new Error(`${PROVIDER_NAMES[provider]} returned an empty response.`);
+  if (!text) throw new ProviderError(provider, `${PROVIDER_NAMES[provider]} returned an empty response.`, undefined, true);
 
   const cleaned = String(text).replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
   let parsed: any;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(`${PROVIDER_NAMES[provider]} returned malformed project JSON.`);
+    throw new ProviderError(provider, `${PROVIDER_NAMES[provider]} returned malformed project JSON.`, undefined, true);
   }
 
   if (!parsed || !Array.isArray(parsed.files) || typeof parsed.summary !== "string") {
-    throw new Error(`${PROVIDER_NAMES[provider]} returned an invalid project structure.`);
+    throw new ProviderError(provider, `${PROVIDER_NAMES[provider]} returned an invalid project structure.`, undefined, true);
   }
   return parsed as GeneratedProject;
 }
 
-async function callOpenAICompatible(provider: Exclude<Provider, "anthropic">, apiKey: string, model: string, prompt: string): Promise<GeneratedProject> {
+async function callOpenAICompatible(
+  provider: Exclude<Provider, "anthropic">,
+  apiKey: string,
+  model: string,
+  prompt: string,
+  signal?: AbortSignal
+): Promise<GeneratedProject> {
   const endpoints: Record<Exclude<Provider, "anthropic">, string> = {
     groq: "https://api.groq.com/openai/v1/chat/completions",
     cerebras: "https://api.cerebras.ai/v1/chat/completions",
@@ -165,9 +214,11 @@ async function callOpenAICompatible(provider: Exclude<Provider, "anthropic">, ap
     headers["X-Title"] = env("OPENROUTER_APP_NAME") ?? "Appo AI App Builder";
   }
 
-  const res = await fetch(endpoints[provider], {
+  const res = await fetchWithTimeout(endpoints[provider], {
     method: "POST",
     headers,
+    timeoutMs: GENERATION_TIMEOUT_MS,
+    signal,
     body: JSON.stringify({
       model,
       messages: [
@@ -181,9 +232,11 @@ async function callOpenAICompatible(provider: Exclude<Provider, "anthropic">, ap
   return parseGeneratedProject(await readJsonResponse(res, provider), provider);
 }
 
-async function callAnthropic(apiKey: string, model: string, prompt: string): Promise<GeneratedProject> {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+async function callAnthropic(apiKey: string, model: string, prompt: string, signal?: AbortSignal): Promise<GeneratedProject> {
+  const res = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
     method: "POST",
+    timeoutMs: GENERATION_TIMEOUT_MS,
+    signal,
     headers: {
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
@@ -218,7 +271,36 @@ function modelFor(provider: Provider): string {
   return env(names[provider]) ?? DEFAULT_MODELS[provider];
 }
 
-export async function generateApp(req: GenerateAppRequest): Promise<GeneratedProject> {
+function apiKeyFor(provider: Provider): string | undefined {
+  const names: Record<Provider, string> = {
+    groq: "GROQ_API_KEY",
+    cerebras: "CEREBRAS_API_KEY",
+    openrouter: "OPENROUTER_API_KEY",
+    anthropic: "ANTHROPIC_API_KEY",
+  };
+  return env(names[provider]);
+}
+
+/**
+ * A failure is worth a same-provider retry only when it is transient: a
+ * 429/5xx, a timeout, or a truncated/unparseable body. A 400 or a 401 will
+ * fail identically every time — retrying it wastes the user's wall clock
+ * and delays failover to a provider that would have worked.
+ */
+export function shouldRetrySameProvider(error: unknown): boolean {
+  if (error instanceof UpstreamTimeoutError) return false; // already burned the budget; move on
+  if (error instanceof ProviderError) return error.retryable;
+  return isLimitOrAvailabilityError(error);
+}
+
+export interface GenerateOptions {
+  /** Lets a caller cancel an in-flight generation (user pressed Cancel). */
+  signal?: AbortSignal;
+  /** Injected in tests so retry backoff does not consume real time. */
+  sleep?: (ms: number) => Promise<void>;
+}
+
+export async function generateApp(req: GenerateAppRequest, options: GenerateOptions = {}): Promise<GeneratedProject> {
   const task = estimateTaskSize(req);
   const providers = configuredProviders(task.large);
 
@@ -233,30 +315,32 @@ export async function generateApp(req: GenerateAppRequest): Promise<GeneratedPro
   const prompt = buildPrompt(req);
   const failures: string[] = [];
 
-  // Required order: Groq -> Cerebras -> OpenRouter -> Claude (large tasks only).
+  // Routing order: Groq -> Cerebras -> OpenRouter -> Claude (large tasks
+  // only). Each provider gets a bounded retry for transient faults before
+  // the next one is tried, so a single 503 does not immediately push a
+  // request onto a slower, more expensive provider.
   for (const provider of providers) {
+    if (options.signal?.aborted) throw new Error("Generation was cancelled.");
+
+    const key = apiKeyFor(provider);
+    if (!key) continue;
+    const model = modelFor(provider);
+
     try {
-      const key = provider === "groq"
-        ? env("GROQ_API_KEY")!
-        : provider === "cerebras"
-          ? env("CEREBRAS_API_KEY")!
-          : provider === "openrouter"
-            ? env("OPENROUTER_API_KEY")!
-            : env("ANTHROPIC_API_KEY")!;
-      const model = modelFor(provider);
-      const project = provider === "anthropic"
-        ? await callAnthropic(key, model, prompt)
-        : await callOpenAICompatible(provider, key, model, prompt);
-
-      return project;
+      return await withRetry(
+        () =>
+          provider === "anthropic"
+            ? callAnthropic(key, model, prompt, options.signal)
+            : callOpenAICompatible(provider as Exclude<Provider, "anthropic">, key, model, prompt, options.signal),
+        (error) => shouldRetrySameProvider(error),
+        { attempts: ATTEMPTS_PER_PROVIDER, sleep: options.sleep }
+      );
     } catch (error) {
+      if (options.signal?.aborted) throw new Error("Generation was cancelled.");
       const message = error instanceof Error ? error.message : String(error);
-      failures.push(`${PROVIDER_NAMES[provider]}: ${message}`);
-
-      // Automatically fail over for provider limits/capacity. For ordinary
-      // malformed responses or configuration errors, keep going as well so
-      // one provider cannot make the whole AI builder unavailable.
-      if (!isLimitOrAvailabilityError(error)) continue;
+      // redactString again here: a non-ProviderError (a raw network error,
+      // say) has not been through readJsonResponse's redaction.
+      failures.push(`${PROVIDER_NAMES[provider]}: ${redactString(message)}`);
     }
   }
 
@@ -287,9 +371,10 @@ export async function chatWithAI(systemPrompt: string, messages: { role: "user" 
         headers["HTTP-Referer"] = env("OPENROUTER_SITE_URL") ?? "http://localhost:3000";
         headers["X-Title"] = env("OPENROUTER_APP_NAME") ?? "Appo AI App Builder";
       }
-      const res = await fetch(endpoint[provider], {
+      const res = await fetchWithTimeout(endpoint[provider], {
         method: "POST",
         headers,
+        timeoutMs: CHAT_TIMEOUT_MS,
         body: JSON.stringify({
           model: modelFor(provider),
           messages: [{ role: "system", content: systemPrompt }, ...messages],
@@ -298,10 +383,10 @@ export async function chatWithAI(systemPrompt: string, messages: { role: "user" 
       });
       const data = await readJsonResponse(res, provider) as any;
       const text = data?.choices?.[0]?.message?.content;
-      if (!text) throw new Error(`${PROVIDER_NAMES[provider]} returned an empty chat response.`);
+      if (!text) throw new ProviderError(provider, `${PROVIDER_NAMES[provider]} returned an empty chat response.`, undefined, true);
       return String(text);
     } catch (error) {
-      failures.push(error instanceof Error ? error.message : String(error));
+      failures.push(redactString(error instanceof Error ? error.message : String(error)));
     }
   }
   throw new Error(`All chat AI providers failed: ${failures.join(" | ")}`);
@@ -312,5 +397,11 @@ export const __testables = {
   estimateTaskSize,
   configuredProviders,
   isLimitOrAvailabilityError,
+  shouldRetrySameProvider,
+  apiKeyFor,
+  modelFor,
   DEFAULT_MODELS,
+  GENERATION_TIMEOUT_MS,
+  CHAT_TIMEOUT_MS,
+  ATTEMPTS_PER_PROVIDER,
 };

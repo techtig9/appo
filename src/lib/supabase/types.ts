@@ -8,6 +8,11 @@ export interface UserRow {
   two_factor_enabled: boolean;
   theme_preference: "light" | "dark" | "system";
   onboarding_completed: boolean;
+  avatar_url: string | null;
+  email_security_alerts: boolean;
+  email_product_updates: boolean;
+  email_billing_alerts: boolean;
+  marketing_opt_in: boolean;
   created_at: string;
 }
 
@@ -48,6 +53,16 @@ export interface TemplateRow {
   category: string;
   name: string;
   thumbnail: string | null;
+  slug: string | null;
+  description: string | null;
+  tags: string[];
+  platforms: string[];
+  difficulty: "starter" | "intermediate" | "advanced" | null;
+  is_featured: boolean;
+  is_new: boolean;
+  popularity: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AppVersionRow {
@@ -104,7 +119,58 @@ export interface AppInvitationRow {
 export interface PaddleWebhookEventRow {
   event_id: string;
   event_type: string;
+  subject_id: string | null;
+  occurred_at: string | null;
+  status: "received" | "processed" | "failed" | "ignored";
+  error_detail: string | null;
+  processed_at: string | null;
   received_at: string;
+}
+
+export type NotificationCategory =
+  | "auth"
+  | "generation"
+  | "project"
+  | "deployment"
+  | "billing"
+  | "team"
+  | "system";
+
+export interface NotificationRow {
+  id: string;
+  user_id: string;
+  category: NotificationCategory;
+  title: string;
+  body: string | null;
+  href: string | null;
+  severity: "info" | "success" | "warning" | "error";
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface AuditLogRow {
+  id: string;
+  user_id: string | null;
+  actor_email: string | null;
+  action: string;
+  resource_type: string | null;
+  resource_id: string | null;
+  ip_hash: string | null;
+  user_agent: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface EmailDeliveryRow {
+  id: string;
+  user_id: string | null;
+  recipient: string;
+  template: string;
+  dedupe_key: string | null;
+  provider_message_id: string | null;
+  status: "queued" | "sent" | "failed" | "skipped";
+  error_detail: string | null;
+  created_at: string;
 }
 
 export interface PaymentRow {
@@ -132,6 +198,18 @@ export interface Database {
       app_collaborators: { Row: AppCollaboratorRow; Insert: Partial<AppCollaboratorRow>; Update: Partial<AppCollaboratorRow> };
       app_invitations: { Row: AppInvitationRow; Insert: Partial<AppInvitationRow>; Update: Partial<AppInvitationRow> };
       paddle_webhook_events: { Row: PaddleWebhookEventRow; Insert: Partial<PaddleWebhookEventRow>; Update: Partial<PaddleWebhookEventRow> };
+      notifications: { Row: NotificationRow; Insert: Partial<NotificationRow>; Update: Partial<NotificationRow> };
+      audit_logs: { Row: AuditLogRow; Insert: Partial<AuditLogRow>; Update: Partial<AuditLogRow> };
+      email_deliveries: { Row: EmailDeliveryRow; Insert: Partial<EmailDeliveryRow>; Update: Partial<EmailDeliveryRow> };
+    };
+    Functions: {
+      /**
+       * Atomic credit decrement. Returns the new balance, or null when the
+       * balance was insufficient. See supabase/phase-21-migration.sql.
+       */
+      consume_credits: { Args: { p_user_id: string; p_amount: number }; Returns: number | null };
+      /** Atomic refund, capped at credits_granted. Returns the new balance. */
+      refund_credits: { Args: { p_user_id: string; p_amount: number }; Returns: number | null };
     };
   };
 }

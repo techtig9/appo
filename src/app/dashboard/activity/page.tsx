@@ -39,19 +39,19 @@ export default function ActivityPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="text-xs font-semibold uppercase tracking-[.18em] text-violet-300">Workspace history</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">Activity</h1><p className="mt-2 text-sm text-slate-400">A clear timeline of what is happening across your Appo workspace.</p></div>
-        <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white">← Back to overview</Link>
+        <div><p className="text-xs font-semibold uppercase tracking-[.18em] text-brand">Workspace history</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Activity</h1><p className="mt-2 text-sm text-ink-secondary">A clear timeline of what is happening across your Appo workspace.</p></div>
+        <Link href="/dashboard" className="text-sm text-ink-secondary hover:text-ink">← Back to overview</Link>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-2">
-        {FILTERS.map((value) => <button key={value} onClick={() => setFilter(value)} className={`rounded-full border px-3.5 py-2 text-xs font-medium capitalize transition ${filter === value ? "border-violet/40 bg-violet/15 text-violet-100" : "border-white/10 bg-white/[.025] text-slate-400 hover:text-white"}`}>{value}</button>)}
+        {FILTERS.map((value) => <button key={value} onClick={() => setFilter(value)} className={`rounded-full border px-3.5 py-2 text-xs font-medium capitalize transition ${filter === value ? "border-brand-border bg-brand-subtle text-brand" : "border-line bg-canvas-subtle text-ink-secondary hover:text-ink"}`}>{value}</button>)}
       </div>
 
-      <section className="mt-5 overflow-hidden rounded-3xl border border-white/[.08] bg-white/[.025]">
-        {loading && <div className="p-10 text-center text-sm text-slate-500">Loading workspace activity…</div>}
-        {!loading && error && <div className="p-10 text-center text-sm text-rose-300">{error}</div>}
-        {!loading && !error && visible.length === 0 && <div className="p-14 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[.04] text-xl text-slate-400">◌</div><h2 className="mt-4 text-sm font-semibold text-white">Nothing here yet</h2><p className="mt-1 text-sm text-slate-500">Create an app or deploy a project and your activity will appear here.</p><Link href="/dashboard/generator" className="mt-5 inline-flex rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-slate-950">Create an app</Link></div>}
-        {!loading && !error && visible.length > 0 && <div className="divide-y divide-white/[.06]">{visible.map((item) => <div key={item.id} className="data-row flex gap-4 p-5 sm:p-6"><Icon type={item.type}/><div className="min-w-0 flex-1"><div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-semibold text-white">{item.title}</p><time className="text-[11px] text-slate-600">{formatTime(item.createdAt)}</time></div><p className="mt-1 text-sm leading-6 text-slate-400">{item.description}</p>{item.appId && <Link href={`/dashboard/apps?app=${encodeURIComponent(item.appId)}`} className="mt-2 inline-block text-xs font-medium text-violet-300 hover:text-violet-200">Open {item.appName ?? "app"} →</Link>}</div></div>)}</div>}
+      <section className="mt-5 overflow-hidden rounded-3xl border border-line bg-canvas-subtle">
+        {loading && <div className="p-10 text-center text-sm text-ink-muted">Loading workspace activity…</div>}
+        {!loading && error && <div className="p-10 text-center text-sm text-danger">{error}</div>}
+        {!loading && !error && visible.length === 0 && <div className="p-14 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-canvas-subtle text-xl text-ink-secondary">◌</div><h2 className="mt-4 text-sm font-semibold text-ink">Nothing here yet</h2><p className="mt-1 text-sm text-ink-muted">Create an app or deploy a project and your activity will appear here.</p><Link href="/dashboard/generator" className="btn btn-primary btn-sm mt-5">Create an app</Link></div>}
+        {!loading && !error && visible.length > 0 && <div className="divide-y divide-line">{visible.map((item) => <div key={item.id} className="data-row flex gap-4 p-5 sm:p-6"><Icon type={item.type}/><div className="min-w-0 flex-1"><div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-semibold text-ink">{item.title}</p><time className="text-[11px] text-ink-muted">{formatTime(item.createdAt)}</time></div><p className="mt-1 text-sm leading-6 text-ink-secondary">{item.description}</p>{item.appId && <Link href={`/dashboard/apps?app=${encodeURIComponent(item.appId)}`} className="mt-2 inline-block text-xs font-medium text-brand hover:text-brand">Open {item.appName ?? "app"} →</Link>}</div></div>)}</div>}
       </section>
     </div>
   );

@@ -29,13 +29,13 @@ export function CodeEditor({ files, onSave }: CodeEditorProps) {
 
   return (
     <div className="glass-card flex h-[600px] overflow-hidden">
-      <aside className="w-56 shrink-0 overflow-y-auto border-r border-white/10 p-3">
+      <aside className="w-56 shrink-0 overflow-y-auto border-r border-line p-3">
         {localFiles.map((f) => (
           <button
             key={f.path}
             onClick={() => setActivePath(f.path)}
             className={`block w-full truncate rounded-lg px-2 py-1 text-left text-sm ${
-              f.path === activePath ? "bg-violet/10 font-medium text-violet" : "text-slate-400"
+              f.path === activePath ? "bg-brand-subtle font-medium text-brand" : "text-ink-secondary"
             }`}
           >
             {f.path}

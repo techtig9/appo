@@ -23,7 +23,7 @@ export default function AdminPage() {
 
   return (
     <div className="fade-in space-y-6">
-      <h1 className="text-2xl font-semibold text-white">Admin Panel</h1>
+      <h1 className="text-2xl font-semibold text-ink">Admin Panel</h1>
 
       <div className="flex gap-2">
         {(["users", "subscriptions", "payments"] as const).map((t) => (
@@ -31,7 +31,7 @@ export default function AdminPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-full px-4 py-2 text-sm capitalize ${
-              tab === t ? "bg-violet text-white" : "glass-card text-slate-300"
+              tab === t ? "bg-brand text-ink" : "glass-card text-ink-secondary"
             }`}
           >
             {t}
@@ -43,7 +43,7 @@ export default function AdminPage() {
         <table className="w-full text-sm">
           <tbody>
             {data.map((row) => (
-              <tr key={row.id} className="border-b border-white/10 last:border-0">
+              <tr key={row.id} className="border-b border-line last:border-0">
                 <td className="py-2 pr-4">{row.id}</td>
                 <td className="py-2 pr-4">{row.email ?? row.plan ?? row.status}</td>
                 {tab === "subscriptions" && (
@@ -51,7 +51,7 @@ export default function AdminPage() {
                     <select
                       defaultValue={row.plan}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => overridePlan(row.id, e.target.value)}
-                      className="rounded-lg border border-white/10 bg-white/5 text-white placeholder:text-slate-400 px-2 py-1"
+                      className="rounded-lg border border-line bg-canvas-subtle text-ink placeholder:text-ink-secondary px-2 py-1"
                     >
                       {["free", "starter", "pro", "business"].map((p) => (
                         <option key={p} value={p}>
@@ -65,7 +65,7 @@ export default function AdminPage() {
             ))}
           </tbody>
         </table>
-        {data.length === 0 && <p className="text-slate-400">No records.</p>}
+        {data.length === 0 && <p className="text-ink-secondary">No records.</p>}
       </div>
     </div>
   );

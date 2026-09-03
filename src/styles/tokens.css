@@ -1,0 +1,264 @@
+/**
+ * Appo design tokens — the single source of truth for colour, space,
+ * type, radius, elevation and motion.
+ *
+ * Nothing in the app should invent a hex value, a shadow or a duration.
+ * Before this file the palette was scattered across globals.css, the
+ * Tailwind config and inline classes in a dozen pages, which is why the
+ * product had three different purples and five different card treatments.
+ *
+ * Theming works on three states, matching how the viewer's preference is
+ * actually expressed:
+ *   :root                      → light values (the base layer)
+ *   @media (prefers-color-scheme: dark), :root:not([data-theme="light"])
+ *                              → dark values when the OS says dark
+ *   :root[data-theme="dark"]   → dark values when the user chose dark
+ * Dark is the primary design; light is a deliberate second palette, not
+ * an inversion of it.
+ */
+
+:root {
+  /* ---------------------------------------------------------- colour */
+  /* Light theme. Deliberately warm-neutral rather than pure white so
+     large surfaces do not glare next to the dark product screenshots. */
+  --app-bg: #fafafa;
+  --app-bg-subtle: #f3f4f6;
+  --app-surface: #ffffff;
+  --app-surface-raised: #ffffff;
+  --app-surface-sunken: #f6f7f9;
+  --app-border: #e5e7eb;
+  --app-border-strong: #d3d7de;
+
+  --app-text: #111318;
+  --app-text-secondary: #4b5160;
+  --app-text-muted: #6b7280;
+  --app-text-inverse: #ffffff;
+
+  --app-brand: #6d4aff;
+  --app-brand-hover: #5d39f5;
+  --app-brand-subtle: rgba(109, 74, 255, 0.1);
+  --app-brand-border: rgba(109, 74, 255, 0.28);
+  --app-brand-contrast: #ffffff;
+
+  --app-secondary: #4b6bff;
+  --app-ai: #9333ea;
+
+  --app-success: #16a34a;
+  --app-warning: #d97706;
+  --app-error: #dc2626;
+  --app-info: #0284c7;
+
+  --app-success-subtle: rgba(22, 163, 74, 0.1);
+  --app-warning-subtle: rgba(217, 119, 6, 0.1);
+  --app-error-subtle: rgba(220, 38, 38, 0.1);
+  --app-info-subtle: rgba(2, 132, 199, 0.1);
+
+  /* Restrained: used on the hero and one or two accents, never as a
+     background for ordinary cards. */
+  --app-gradient-brand: linear-gradient(115deg, #4b6bff 0%, #6d4aff 45%, #9333ea 100%);
+  --app-scrim: rgba(9, 9, 11, 0.45);
+
+  /* ---------------------------------------------------------- space */
+  /* A 4px base. Section gaps are generous, card internals are tight. */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ---------------------------------------------------------- radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-hero: 24px;
+  --radius-pill: 9999px;
+
+  /* ------------------------------------------------------- elevation */
+  /* Contrast and borders carry the hierarchy; shadows are a last resort
+     and only get strong for surfaces that genuinely float. */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.06);
+  --shadow-md: 0 4px 12px rgba(9, 9, 11, 0.08);
+  --shadow-lg: 0 12px 32px rgba(9, 9, 11, 0.12);
+  --shadow-overlay: 0 24px 64px rgba(9, 9, 11, 0.24);
+  --shadow-focus: 0 0 0 3px var(--app-brand-subtle);
+
+  /* ------------------------------------------------------------ type */
+  /* --font-inter is injected by next/font in the root layout; the stack
+     after it is what renders during the swap and if the font fails. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-caption: 0.75rem;   /* 12px */
+  --text-small: 0.8125rem;   /* 13px */
+  --text-body: 0.875rem;     /* 14px — the product's default */
+  --text-body-lg: 1rem;      /* 16px */
+  --text-card: 1.0625rem;    /* 17px */
+  --text-section: 1.5rem;    /* 24px */
+  --text-page: 2rem;         /* 32px */
+  --text-hero: 4rem;         /* 64px, scaled up at wide breakpoints */
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+
+  /* ---------------------------------------------------------- motion */
+  /* Micro 150-200ms, component 200-350ms, large 400-600ms. */
+  --duration-micro: 160ms;
+  --duration-fast: 220ms;
+  --duration-normal: 300ms;
+  --duration-slow: 480ms;
+  --ease-out: cubic-bezier(0.22, 0.9, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* --------------------------------------------------------- z-index */
+  /* Named so nothing has to guess whether 9999 is enough. */
+  --z-base: 0;
+  --z-sticky: 20;
+  --z-header: 30;
+  --z-sidebar: 40;
+  --z-overlay: 50;
+  --z-dialog: 60;
+  --z-toast: 70;
+  --z-tooltip: 80;
+
+  /* ------------------------------------------------------ dimensions */
+  --sidebar-width: 248px;
+  --sidebar-width-collapsed: 68px;
+  --header-height: 56px;
+  --content-max: 1440px;
+
+  color-scheme: light;
+}
+
+/* Dark by OS preference — but not when the user has explicitly chosen
+   light, hence the :not() guard. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --app-bg: #09090b;
+    --app-bg-subtle: #0f1014;
+    --app-surface: #13151a;
+    --app-surface-raised: #181a21;
+    --app-surface-sunken: #0b0b0f;
+    --app-border: #272a33;
+    --app-border-strong: #363a45;
+
+    --app-text: #f5f7fa;
+    --app-text-secondary: #a1a7b3;
+    --app-text-muted: #717784;
+    --app-text-inverse: #09090b;
+
+    --app-brand: #7c5cff;
+    --app-brand-hover: #8f74ff;
+    --app-brand-subtle: rgba(124, 92, 255, 0.14);
+    --app-brand-border: rgba(124, 92, 255, 0.32);
+    --app-brand-contrast: #ffffff;
+
+    --app-secondary: #5b7cff;
+    --app-ai: #a855f7;
+
+    --app-success: #22c55e;
+    --app-warning: #f59e0b;
+    --app-error: #ef4444;
+    --app-info: #38bdf8;
+
+    --app-success-subtle: rgba(34, 197, 94, 0.12);
+    --app-warning-subtle: rgba(245, 158, 11, 0.12);
+    --app-error-subtle: rgba(239, 68, 68, 0.12);
+    --app-info-subtle: rgba(56, 189, 248, 0.12);
+
+    --app-gradient-brand: linear-gradient(115deg, #5b7cff 0%, #7c5cff 45%, #a855f7 100%);
+    --app-scrim: rgba(3, 3, 5, 0.72);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+    --shadow-overlay: 0 28px 72px rgba(0, 0, 0, 0.62);
+    --shadow-focus: 0 0 0 3px rgba(124, 92, 255, 0.35);
+
+    color-scheme: dark;
+  }
+}
+
+/* Explicit dark choice — must win in both directions, so the same block
+   is repeated under the attribute selector rather than relying on the
+   media query above. */
+:root[data-theme="dark"] {
+  --app-bg: #09090b;
+  --app-bg-subtle: #0f1014;
+  --app-surface: #13151a;
+  --app-surface-raised: #181a21;
+  --app-surface-sunken: #0b0b0f;
+  --app-border: #272a33;
+  --app-border-strong: #363a45;
+
+  --app-text: #f5f7fa;
+  --app-text-secondary: #a1a7b3;
+  --app-text-muted: #717784;
+  --app-text-inverse: #09090b;
+
+  --app-brand: #7c5cff;
+  --app-brand-hover: #8f74ff;
+  --app-brand-subtle: rgba(124, 92, 255, 0.14);
+  --app-brand-border: rgba(124, 92, 255, 0.32);
+  --app-brand-contrast: #ffffff;
+
+  --app-secondary: #5b7cff;
+  --app-ai: #a855f7;
+
+  --app-success: #22c55e;
+  --app-warning: #f59e0b;
+  --app-error: #ef4444;
+  --app-info: #38bdf8;
+
+  --app-success-subtle: rgba(34, 197, 94, 0.12);
+  --app-warning-subtle: rgba(245, 158, 11, 0.12);
+  --app-error-subtle: rgba(239, 68, 68, 0.12);
+  --app-info-subtle: rgba(56, 189, 248, 0.12);
+
+  --app-gradient-brand: linear-gradient(115deg, #5b7cff 0%, #7c5cff 45%, #a855f7 100%);
+  --app-scrim: rgba(3, 3, 5, 0.72);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-overlay: 0 28px 72px rgba(0, 0, 0, 0.62);
+  --shadow-focus: 0 0 0 3px rgba(124, 92, 255, 0.35);
+
+  color-scheme: dark;
+}
+
+/**
+ * Reduced motion is honoured globally rather than per-component, so a new
+ * animation cannot forget it. Durations collapse to a value short enough
+ * to be imperceptible but non-zero, which keeps transitionend handlers
+ * firing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-micro: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

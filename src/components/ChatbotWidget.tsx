@@ -48,41 +48,47 @@ export function ChatbotWidget() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-[90]">
+    // Sits above the cookie notice's stacking context but below dialogs,
+    // and is offset from the bottom-right corner so it does not land on
+    // top of the cookie notice's dismiss button on a narrow screen.
+    <div className="fixed bottom-4 right-4 z-overlay flex flex-col items-end">
       {open && (
-        <div className="glass-card fade-in mb-3 flex h-[440px] w-[340px] flex-col overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-deep to-fuchsia-500 text-sm">
-              ✨
+        <div className="card card-elevated mb-3 flex h-[440px] w-[min(340px,calc(100vw-2rem))] animate-scale-in flex-col overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ai/15 text-ai" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3Z" />
+              </svg>
             </span>
-            <p className="text-sm font-semibold">appo Assistant</p>
+            <p className="text-small font-semibold text-ink">Appo Assistant</p>
           </div>
 
           <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-caption leading-relaxed ${
                   m.role === "user"
-                    ? "ml-auto rounded-br-sm bg-gradient-to-r from-violet to-fuchsia-500 text-white"
-                    : "rounded-bl-sm border border-white/10 bg-white/5 text-slate-200"
+                    ? "ml-auto rounded-br-sm bg-brand text-brand-contrast"
+                    : "rounded-bl-sm border border-line bg-canvas-subtle text-ink-secondary"
                 }`}
               >
                 {m.content}
               </div>
             ))}
-            {sending && <div className="text-xs text-slate-500">Thinking…</div>}
+            {sending && <div className="text-caption text-ink-muted">Thinking…</div>}
           </div>
 
-          <div className="flex gap-2 border-t border-white/10 p-3">
+          <div className="flex gap-2 border-t border-line p-3">
             <input
               value={input}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
               onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && sendMessage()}
               placeholder="Ask about your app idea…"
-              className="input text-xs"
+              aria-label="Message the Appo assistant"
+              className="input text-caption"
             />
-            <button onClick={sendMessage} disabled={sending} className="btn-accent px-4 text-xs">
+            <button onClick={sendMessage} disabled={sending} className="btn btn-primary btn-sm shrink-0">
               Send
             </button>
           </div>
@@ -91,10 +97,19 @@ export function ChatbotWidget() {
 
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close appo Assistant" : "Open appo Assistant"}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-deep via-violet to-fuchsia-500 text-2xl shadow-lg shadow-violet/40 transition hover:scale-105"
+        aria-label={open ? "Close the Appo assistant" : "Open the Appo assistant"}
+        aria-expanded={open}
+        className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-surface text-ink shadow-lg transition-[transform,border-color] duration-micro ease-out hover:border-line-strong hover:scale-105 active:scale-95"
       >
-        {open ? "✕" : "✨"}
+        {open ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="text-ai">
+            <path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3Z" />
+          </svg>
+        )}
       </button>
     </div>
   );
