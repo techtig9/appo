@@ -99,12 +99,12 @@ export default function SignupPage() {
         <AuthNotice tone="success">
           Click the link in that email to activate your account. The link expires in 24 hours.
         </AuthNotice>
-        <p className="mt-4 text-sm leading-6 text-[#A1A7B3]">
+        <p className="mt-4 text-small leading-relaxed text-ink-secondary">
           Nothing arrived? Check your spam folder, or{" "}
           <button
             type="button"
             onClick={() => setSubmitted(false)}
-            className="font-medium text-[#A78BFA] underline underline-offset-2 hover:text-[#C4B5FD]"
+            className="font-medium text-brand underline underline-offset-2"
           >
             try a different address
           </button>
@@ -121,7 +121,7 @@ export default function SignupPage() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-[#A78BFA] hover:text-[#C4B5FD]">
+          <Link href="/login" className="font-medium text-brand hover:underline">
             Sign in
           </Link>
         </>
@@ -160,9 +160,9 @@ export default function SignupPage() {
       </form>
 
       <div className="my-6 flex items-center gap-3" aria-hidden="true">
-        <span className="h-px flex-1 bg-[#272A33]" />
-        <span className="text-xs text-[#717784]">or</span>
-        <span className="h-px flex-1 bg-[#272A33]" />
+        <span className="h-px flex-1 bg-line" />
+        <span className="text-caption text-ink-muted">or</span>
+        <span className="h-px flex-1 bg-line" />
       </div>
 
       <GoogleButton busy={busy === "google"} onClick={handleGoogleSignup} label="Sign up with Google" />

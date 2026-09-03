@@ -93,7 +93,7 @@ function LoginForm() {
       footer={
         <>
           New to Appo?{" "}
-          <Link href="/signup" className="font-medium text-[#A78BFA] hover:text-[#C4B5FD]">
+          <Link href="/signup" className="font-medium text-brand hover:underline">
             Create an account
           </Link>
         </>
@@ -124,7 +124,7 @@ function LoginForm() {
           onChange={setPassword}
           placeholder="••••••••"
           trailing={
-            <Link href="/forgot-password" className="text-xs font-medium text-[#A1A7B3] hover:text-[#F5F7FA]">
+            <Link href="/forgot-password" className="text-caption font-medium text-ink-muted transition-colors duration-micro hover:text-ink">
               Forgot?
             </Link>
           }
@@ -138,9 +138,9 @@ function LoginForm() {
       </form>
 
       <div className="my-6 flex items-center gap-3" aria-hidden="true">
-        <span className="h-px flex-1 bg-[#272A33]" />
-        <span className="text-xs text-[#717784]">or</span>
-        <span className="h-px flex-1 bg-[#272A33]" />
+        <span className="h-px flex-1 bg-line" />
+        <span className="text-caption text-ink-muted">or</span>
+        <span className="h-px flex-1 bg-line" />
       </div>
 
       <GoogleButton busy={busy === "google"} onClick={handleGoogleLogin} label="Continue with Google" />

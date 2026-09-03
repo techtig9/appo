@@ -110,7 +110,7 @@ export default function ResetPasswordPage() {
         footer={
           <>
             Remembered your password?{" "}
-            <Link href="/login" className="font-medium text-[#A78BFA] hover:text-[#C4B5FD]">
+            <Link href="/login" className="font-medium text-brand hover:underline">
               Sign in
             </Link>
           </>
@@ -122,7 +122,7 @@ export default function ResetPasswordPage() {
         </AuthNotice>
         <Link
           href="/forgot-password"
-          className="mt-5 flex w-full items-center justify-center rounded-lg bg-[#7C5CFF] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6B4AF0]"
+          className="btn btn-primary mt-5 h-11 w-full"
         >
           Request a new link
         </Link>
@@ -134,9 +134,9 @@ export default function ResetPasswordPage() {
     return (
       <AuthShell title="Choose a new password" subtitle="Verifying your reset link…">
         <div className="space-y-3" aria-busy="true" aria-live="polite">
-          <div className="h-10 animate-pulse rounded-lg bg-[#1B1D24]" />
-          <div className="h-10 animate-pulse rounded-lg bg-[#1B1D24]" />
-          <div className="h-10 animate-pulse rounded-lg bg-[#1B1D24]" />
+          <div className="skeleton h-11" />
+          <div className="skeleton h-11" />
+          <div className="skeleton h-11" />
         </div>
       </AuthShell>
     );

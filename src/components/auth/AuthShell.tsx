@@ -29,24 +29,24 @@ export function AuthShell({
         <Link href="/" className="mb-8 flex items-center justify-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-icon.svg" alt="" width={32} height={32} className="h-8 w-8 rounded-lg" />
-          <span className="text-lg font-semibold tracking-tight text-[#F5F7FA]">Appo</span>
+          <span className="text-lg font-semibold tracking-tight text-ink">Appo</span>
         </Link>
 
-        <div className="rounded-2xl border border-[#272A33] bg-[#13151A] p-7 sm:p-8">
-          <h1 className="text-xl font-semibold tracking-tight text-[#F5F7FA]">{title}</h1>
-          {subtitle ? <p className="mt-1.5 text-sm text-[#A1A7B3]">{subtitle}</p> : null}
+        <div className="card p-7 sm:p-8">
+          <h1 className="text-xl font-semibold tracking-tight text-ink">{title}</h1>
+          {subtitle ? <p className="mt-1.5 text-small text-ink-secondary">{subtitle}</p> : null}
           <div className="mt-6">{children}</div>
         </div>
 
-        {footer ? <p className="mt-6 text-center text-sm text-[#A1A7B3]">{footer}</p> : null}
+        {footer ? <p className="mt-6 text-center text-small text-ink-secondary">{footer}</p> : null}
 
-        <p className="mt-8 text-center text-xs leading-5 text-[#717784]">
+        <p className="mt-8 text-center text-caption leading-5 text-ink-muted">
           By continuing you agree to Appo&apos;s{" "}
-          <Link href="/terms" className="underline underline-offset-2 hover:text-[#A1A7B3]">
+          <Link href="/terms" className="underline underline-offset-2 hover:text-ink-secondary">
             Terms
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="underline underline-offset-2 hover:text-[#A1A7B3]">
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-ink-secondary">
             Privacy Policy
           </Link>
           .
@@ -84,7 +84,7 @@ export function AuthField({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-xs font-medium text-[#A1A7B3]">
+        <label htmlFor={id} className="text-caption font-medium text-ink-secondary">
           {label}
         </label>
         {trailing}
@@ -100,10 +100,10 @@ export function AuthField({
         placeholder={placeholder}
         aria-describedby={hint ? `${id}-hint` : undefined}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-[#272A33] bg-[#0F1014] px-3.5 py-2.5 text-sm text-[#F5F7FA] outline-none transition placeholder:text-[#5B616E] focus:border-[#7C5CFF] focus:ring-2 focus:ring-[#7C5CFF]/25"
+        className="input h-11"
       />
       {hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-[#717784]">
+        <p id={`${id}-hint`} className="mt-1.5 text-caption text-ink-muted">
           {hint}
         </p>
       ) : null}
@@ -124,7 +124,7 @@ export function AuthSubmit({
     <button
       type="submit"
       disabled={busy}
-      className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#7C5CFF] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6B4AF0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C5CFF] disabled:cursor-not-allowed disabled:opacity-60"
+      className="btn btn-primary h-11 w-full disabled:cursor-not-allowed"
     >
       {busy ? <Spinner /> : null}
       {busy ? busyLabel ?? "Working…" : children}
@@ -146,7 +146,7 @@ export function GoogleButton({
       type="button"
       onClick={onClick}
       disabled={busy}
-      className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-[#272A33] bg-[#0F1014] px-4 py-2.5 text-sm font-medium text-[#F5F7FA] transition hover:border-[#3A3E4A] hover:bg-[#181A21] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C5CFF] disabled:cursor-not-allowed disabled:opacity-60"
+      className="btn btn-secondary h-11 w-full gap-2.5 disabled:cursor-not-allowed"
     >
       {busy ? <Spinner /> : <GoogleMark />}
       {busy ? "Opening Google…" : label}
@@ -156,9 +156,9 @@ export function GoogleButton({
 
 export function AuthNotice({ tone, children }: { tone: "error" | "info" | "success"; children: ReactNode }) {
   const styles = {
-    error: "border-[#EF4444]/30 bg-[#EF4444]/10 text-[#FCA5A5]",
-    info: "border-[#38BDF8]/25 bg-[#38BDF8]/10 text-[#93D3F8]",
-    success: "border-[#22C55E]/25 bg-[#22C55E]/10 text-[#86EFAC]",
+    error: "border-danger/35 bg-danger-subtle text-danger",
+    info: "border-info/30 bg-info-subtle text-info",
+    success: "border-success/30 bg-success-subtle text-success",
   }[tone];
 
   return (
@@ -166,7 +166,7 @@ export function AuthNotice({ tone, children }: { tone: "error" | "info" | "succe
       // Announced to screen readers: a validation failure that is only
       // visible is invisible to anyone not looking at that part of the page.
       role={tone === "error" ? "alert" : "status"}
-      className={`rounded-lg border px-3 py-2.5 text-sm leading-5 ${styles}`}
+      className={`rounded-md border px-3 py-2.5 text-small leading-5 ${styles}`}
     >
       {children}
     </p>

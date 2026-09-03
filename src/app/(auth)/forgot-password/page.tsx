@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
       footer={
         <>
           Remembered it?{" "}
-          <Link href="/login" className="font-medium text-[#A78BFA] hover:text-[#C4B5FD]">
+          <Link href="/login" className="font-medium text-brand hover:underline">
             Back to sign in
           </Link>
         </>
@@ -48,12 +48,12 @@ export default function ForgotPasswordPage() {
           <AuthNotice tone="success">
             If an account exists for {email}, a reset link is on its way. It expires in 60 minutes.
           </AuthNotice>
-          <p className="mt-4 text-sm leading-6 text-[#A1A7B3]">
+          <p className="mt-4 text-small leading-relaxed text-ink-secondary">
             Nothing arrived after a few minutes? Check your spam folder, or{" "}
             <button
               type="button"
               onClick={() => setSent(false)}
-              className="font-medium text-[#A78BFA] underline underline-offset-2 hover:text-[#C4B5FD]"
+              className="font-medium text-brand underline underline-offset-2"
             >
               send it again
             </button>

@@ -44,36 +44,36 @@ export default function AuthCodeErrorPage({
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-[#272A33] bg-[#13151A] p-8">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#F59E0B]/30 bg-[#F59E0B]/10 text-lg text-[#F59E0B]">
+      <div className="card w-full max-w-md p-8">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-warning/35 bg-warning-subtle text-lg text-warning">
           <span aria-hidden="true">!</span>
         </div>
 
-        <h1 className="mt-5 text-xl font-semibold text-[#F5F7FA]">{reason.title}</h1>
-        <p className="mt-3 text-sm leading-6 text-[#A1A7B3]">{reason.body}</p>
+        <h1 className="mt-5 text-xl font-semibold text-ink">{reason.title}</h1>
+        <p className="mt-3 text-small leading-relaxed text-ink-secondary">{reason.body}</p>
 
         {/* The provider's own description, when it sent one. It is
             attacker-influencable text from a query string, so it is
             rendered as plain text inside a bordered block and never as
             markup or a link. */}
         {searchParams.description ? (
-          <p className="mt-4 rounded-lg border border-[#272A33] bg-[#0F1014] px-3 py-2 font-mono text-xs leading-5 text-[#717784]">
+          <p className="mt-4 rounded-md border border-line bg-canvas-subtle px-3 py-2 font-mono text-caption leading-5 text-ink-muted">
             {searchParams.description.slice(0, 200)}
           </p>
         ) : null}
 
-        {reason.hint ? <p className="mt-4 text-sm text-[#717784]">{reason.hint}</p> : null}
+        {reason.hint ? <p className="mt-4 text-small text-ink-muted">{reason.hint}</p> : null}
 
         <div className="mt-7 flex flex-wrap gap-3">
           <Link
             href="/login"
-            className="rounded-lg bg-[#7C5CFF] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#6B4AF0]"
+            className="btn btn-primary"
           >
             Back to sign in
           </Link>
           <Link
             href="/"
-            className="rounded-lg border border-[#272A33] px-4 py-2.5 text-sm font-medium text-[#F5F7FA] transition hover:border-[#3A3E4A]"
+            className="btn btn-secondary"
           >
             Go to homepage
           </Link>
