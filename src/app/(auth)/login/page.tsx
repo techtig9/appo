@@ -103,6 +103,23 @@ function LoginForm() {
         <AuthNotice tone="info">Google sign-in was cancelled. You can try again or use your password.</AuthNotice>
       ) : null}
 
+      {notice === "signed-out" ? <AuthNotice tone="success">You&apos;ve been signed out.</AuthNotice> : null}
+
+      {/* Set by the middleware when it cannot verify a session at all, so
+          the visitor gets an explanation instead of a bare 500. */}
+      {notice === "unconfigured" ? (
+        <AuthNotice tone="error">
+          This deployment isn&apos;t connected to a database yet, so signing in won&apos;t work. If you own it, set the
+          Supabase environment variables and redeploy.
+        </AuthNotice>
+      ) : null}
+
+      {notice === "unavailable" ? (
+        <AuthNotice tone="error">
+          We couldn&apos;t reach the authentication service just now. Please try again in a moment.
+        </AuthNotice>
+      ) : null}
+
       <form onSubmit={handleLogin} className="space-y-4" noValidate>
         <AuthField
           id="email"
