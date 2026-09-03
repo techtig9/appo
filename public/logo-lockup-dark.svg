@@ -1,29 +1,30 @@
-<svg width="480" height="140" viewBox="0 0 480 140" xmlns="http://www.w3.org/2000/svg">
+<svg width="480" height="140" viewBox="0 0 480 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Appo">
+  <title>Appo</title>
+  <!--
+    Horizontal lockup: the "A" mark plus the wordmark.
+
+    The wordmark is a <text> element with a system font stack. That is a
+    deliberate trade-off: converting it to outlines would make it render
+    identically everywhere, but it would also make the file unreadable and
+    unmaintainable. This lockup is only used on the Privacy and Terms
+    pages, where a few pixels of font variation costs nothing. The icon —
+    which appears everywhere, at small sizes — is all paths.
+  -->
   <defs>
-    <linearGradient id="iconBg2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4C1D95"/>
-      <stop offset="50%" stop-color="#8B5CF6"/>
-      <stop offset="100%" stop-color="#D946EF"/>
+    <linearGradient id="appoMark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B7CFF"/>
+      <stop offset="45%" stop-color="#7C5CFF"/>
+      <stop offset="100%" stop-color="#A855F7"/>
     </linearGradient>
-    <linearGradient id="letterO2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7C3AED"/>
-      <stop offset="50%" stop-color="#C026D3"/>
-      <stop offset="100%" stop-color="#0891B2"/>
-    </linearGradient>
-    <filter id="soft-shadow2" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#4C1D95" flood-opacity="0.3"/>
-    </filter>
   </defs>
 
   <g transform="translate(0,10)">
-    <rect x="0" y="0" width="120" height="120" rx="26" fill="url(#iconBg2)" filter="url(#soft-shadow2)"/>
-    <rect x="35" y="30" width="38" height="65" rx="8" fill="#FFFFFF" opacity="0.97"/>
-    <rect x="49" y="84" width="10" height="2.4" rx="1.2" fill="#8B5CF6" opacity="0.6"/>
-    <path d="M89,17 L93.5,27.5 L104,32 L93.5,36.5 L89,47 L84.5,36.5 L74,32 L84.5,27.5 Z" fill="#FFFFFF"/>
-    <path d="M52,84 L53.8,88.2 L58,90 L53.8,91.8 L52,96 L50.2,91.8 L46,90 L50.2,88.2 Z" fill="#FFFFFF" opacity="0.85"/>
+    <rect x="0" y="0" width="120" height="120" rx="26" fill="url(#appoMark)"/>
+    <g stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M37 90 L60 32 L83 90"/>
+      <path d="M46 71 L74 71"/>
+    </g>
   </g>
 
-  <text x="140" y="88" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="-1">
-    <tspan fill="#18181B">app</tspan><tspan fill="url(#letterO2)">o</tspan>
-  </text>
+  <text x="142" y="88" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5" fill="#111318">Appo</text>
 </svg>
