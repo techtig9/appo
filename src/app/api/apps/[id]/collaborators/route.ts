@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { getPlan } from "@/lib/plans";
 import { createInviteToken, inviteExpiry, normalizeInviteEmail } from "@/lib/collaboration";
+import { sendEmail } from "@/lib/email/resend";
+import { teamInvitationEmail } from "@/lib/email/templates";
+import { recordAudit } from "@/lib/audit";
+import { notify } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
 
 async function getOwner(appId: string) {
   const supabase = createClient();
@@ -49,5 +54,46 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const { error } = await admin.from("app_invitations").insert({ app_id: params.id, inviter_id: ctx.user.id, email, role, token_hash: hash, expires_at: expiresAt });
   if (error) return NextResponse.json({ error: "Couldn't create invitation." }, { status: 500 });
   const url = `${new URL(req.url).origin}/dashboard/team?invite=${encodeURIComponent(token)}`;
-  return NextResponse.json({ ok: true, inviteUrl: url, expiresAt });
+
+  // The invitation row and its token existed, but nothing ever told the
+  // invitee about them — the URL was returned to the inviter and expected
+  // to be copied by hand. Emailing it is what makes the feature usable.
+  const delivery = await sendEmail(admin, {
+    to: email,
+    userId: existingUser?.id,
+    template: "team_invitation",
+    rendered: teamInvitationEmail({
+      inviterName: ctx.user.email ?? "An Appo user",
+      appName: ctx.app.name,
+      role,
+      acceptUrl: url,
+    }),
+  });
+
+  if (existingUser) {
+    await notify(admin, {
+      userId: existingUser.id,
+      category: "team",
+      title: `You've been invited to ${ctx.app.name}`,
+      body: `You have been added as a ${role}.`,
+      href: "/dashboard/team",
+    });
+  }
+
+  await recordAudit(admin, {
+    userId: ctx.user.id,
+    actorEmail: ctx.user.email,
+    action: "team.invited",
+    resourceType: "app",
+    resourceId: params.id,
+    metadata: { role, emailStatus: delivery.status },
+  });
+
+  if (delivery.status !== "sent") {
+    logger.warn("Team invitation email was not delivered", { appId: params.id, status: delivery.status });
+  }
+
+  // `emailed` is reported honestly so the UI can offer the copyable link
+  // as a fallback rather than claiming an email is on its way.
+  return NextResponse.json({ ok: true, inviteUrl: url, expiresAt, emailed: delivery.status === "sent" });
 }

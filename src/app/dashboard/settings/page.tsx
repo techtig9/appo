@@ -85,7 +85,13 @@ export default function SettingsPage() {
     if (!confirm("This permanently deletes your account and all your apps. This cannot be undone. Continue?")) return;
     setDeleting(true);
     try {
-      const res = await fetch("/api/account/delete", { method: "POST" });
+      // The confirmation is re-checked server-side against the session's
+      // own email; sending it here is what lets that check happen.
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmEmail }),
+      });
       if (res.ok) { await createClient().auth.signOut(); router.push("/"); }
       else { const data = await res.json(); setMessage(data.error ?? "Could not delete account."); setDeleting(false); }
     } catch { setMessage("Network error — please try again."); setDeleting(false); }
