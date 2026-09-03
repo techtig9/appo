@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals"],
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "next-env.d.ts",
+    "marketing-site/"
+  ],
+  "rules": {
+    "@next/next/no-img-element": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.{ts,mjs}", "scripts/**"],
+      "rules": {
+        "@next/next/no-img-element": "off"
+      }
+    }
+  ]
+}

@@ -16,6 +16,9 @@ export default async function PublicPreviewPage({ params }: { params: { slug: st
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 text-center text-ink">
+      {/* eslint-disable-next-line @next/next/no-img-element --
+          a local static SVG. next/image cannot optimise a vector, so it
+          would add a request and a required width/height for no gain. */}
       <img src="/logo-icon.svg" alt="" className="mb-6 h-14 w-14 rounded-2xl" />
       <h1 className="text-3xl font-bold">{app.name}</h1>
       <p className="mt-2 text-ink-secondary">

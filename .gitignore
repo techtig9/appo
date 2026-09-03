@@ -39,3 +39,6 @@ yarn-error.log*
 # Deployment tooling
 .vercel
 .sentryclirc
+
+# ESLint
+.eslintcache

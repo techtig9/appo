@@ -6,6 +6,9 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-ink">
       <Link href="/" className="mb-8 inline-block">
+        {/* eslint-disable-next-line @next/next/no-img-element --
+            a local static SVG. next/image cannot optimise a vector, so it
+            would add a request and a required width/height for no gain. */}
         <img src="/logo-lockup.svg" alt="appo" className="h-8 w-auto" />
       </Link>
       <h1 className="text-3xl font-extrabold">Terms of Service</h1>

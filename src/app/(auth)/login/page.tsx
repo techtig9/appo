@@ -152,7 +152,19 @@ export default function LoginPage() {
   // useSearchParams needs a Suspense boundary to keep this page from
   // opting the whole route out of static rendering.
   return (
-    <Suspense fallback={<AuthShell title="Sign in to Appo" subtitle="Loading…" children={null} />}>
+    <Suspense
+      fallback={
+        <AuthShell title="Sign in to Appo" subtitle="Loading…">
+          {/* A skeleton matching the real form's shape, so the card does not
+              jump when the client component hydrates. */}
+          <div className="space-y-4" aria-busy="true">
+            <div className="skeleton h-11" />
+            <div className="skeleton h-11" />
+            <div className="skeleton h-11" />
+          </div>
+        </AuthShell>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

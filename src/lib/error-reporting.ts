@@ -21,7 +21,6 @@ export function reportError(error: unknown, context?: ErrorContext): void {
   // -fail to even parse in environments where @sentry/nextjs isn't
   // installed yet (e.g. this offline sandbox).
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Sentry = require("@sentry/nextjs");
     if (Sentry?.captureException) {
       Sentry.captureException(error, { extra: context });

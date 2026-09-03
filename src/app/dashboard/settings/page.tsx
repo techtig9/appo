@@ -109,7 +109,9 @@ export default function SettingsPage() {
           <div><p className="text-sm font-medium text-ink">Authenticator app</p><p className="text-xs text-ink-muted">{mfaEnabled ? "Enabled and verified" : "Not enabled"}</p></div>
           {mfaEnabled ? <button onClick={disableMfa} disabled={busy} className="btn-outline text-sm">Disable</button> : <button onClick={enableMfa} disabled={busy} className="btn-accent text-sm">Set up 2FA</button>}
         </div>
-        {qr && <div className="rounded-xl border border-line bg-canvas-subtle p-4"><p className="mb-3 text-sm text-ink-secondary">Scan this QR code in your authenticator app.</p><img src={qr} alt="Authenticator QR code" className="h-44 w-44 rounded-lg bg-white p-2" /><div className="mt-4 flex max-w-sm gap-2"><input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="6-digit code" className="input" /><button onClick={verifyMfa} disabled={busy || otp.length !== 6} className="btn-accent text-sm">Verify</button></div></div>}
+        {qr && <div className="rounded-xl border border-line bg-canvas-subtle p-4"><p className="mb-3 text-sm text-ink-secondary">Scan this QR code in your authenticator app.</p>{/* eslint-disable-next-line @next/next/no-img-element -- a runtime
+                data URI; next/image cannot optimise one and would break the src. */}
+              <img src={qr} alt="Authenticator QR code" className="h-44 w-44 rounded-lg bg-white p-2" /><div className="mt-4 flex max-w-sm gap-2"><input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="6-digit code" className="input" /><button onClick={verifyMfa} disabled={busy || otp.length !== 6} className="btn-accent text-sm">Verify</button></div></div>}
       </section>
 
       <section className="glass-card space-y-4 p-6">
