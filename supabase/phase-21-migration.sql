@@ -250,3 +250,15 @@ begin
   return new;
 end;
 $$;
+
+-- ------------------------------------------------------------
+-- 9. One row per (app, version)
+-- ------------------------------------------------------------
+-- The AI edit route computed the next version number from a SELECT and
+-- then inserted it. Two concurrent edits both read "2" and both inserted
+-- version 3, producing two rows claiming to be the same version — version
+-- history and rollback then pick one arbitrarily. This index makes the
+-- second insert fail so the route can retry with the real next number.
+-- Any pre-existing duplicates must be reconciled before this applies.
+create unique index if not exists app_versions_app_version_idx
+  on public.app_versions (app_id, version_number);

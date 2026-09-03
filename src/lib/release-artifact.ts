@@ -43,3 +43,46 @@ export async function getSignedReleaseUrl(path: string, expiresIn = 900) {
   if (error || !data?.signedUrl) throw error ?? new Error("Could not create release URL");
   return data.signedUrl;
 }
+
+/**
+ * Reads a stored release back into a file list.
+ *
+ * The AI edit flow needs the CURRENT project source as context — without
+ * it the model regenerates from the description alone and quietly discards
+ * every change made since the first generation, which is the opposite of
+ * "preserve unrelated existing functionality".
+ *
+ * Extraction is bounded on both count and size: the archive was written by
+ * Appo, but an unbounded read is still an easy way to exhaust memory if a
+ * stored object is ever replaced.
+ */
+export async function readReleaseArtifact(
+  path: string,
+  limits: { maxFiles?: number; maxTotalBytes?: number } = {}
+): Promise<ReleaseFile[]> {
+  const maxFiles = limits.maxFiles ?? MAX_FILES;
+  const maxTotalBytes = limits.maxTotalBytes ?? 25_000_000;
+
+  const admin = createServiceRoleClient();
+  const { data, error } = await admin.storage.from(BUCKET).download(path);
+  if (error || !data) throw error ?? new Error("Release artifact could not be read.");
+
+  const zip = await JSZip.loadAsync(Buffer.from(await data.arrayBuffer()));
+  const files: ReleaseFile[] = [];
+  let totalBytes = 0;
+
+  for (const entry of Object.values(zip.files)) {
+    if (entry.dir) continue;
+    if (files.length >= maxFiles) break;
+    // Re-checked on the way OUT as well as in: a Zip Slip path in a stored
+    // archive must not become a path in a regenerated project.
+    if (!safePath(entry.name)) continue;
+
+    const content = await entry.async("string");
+    totalBytes += Buffer.byteLength(content, "utf8");
+    if (totalBytes > maxTotalBytes) break;
+    files.push({ path: entry.name, content });
+  }
+
+  return files;
+}
