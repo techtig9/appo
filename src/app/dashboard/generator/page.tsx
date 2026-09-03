@@ -260,7 +260,7 @@ function GeneratorWorkspace() {
             <div className="mt-3 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-ink">What are you building?</h2>
-                <p className="mt-1 text-sm text-ink-secondary">Start with the outcome. You don't need to know how to code.</p>
+                <p className="mt-1 text-sm text-ink-secondary">Start with the outcome. You don&apos;t need to know how to code.</p>
               </div>
               {detectedCategory && <span className="category-chip">{CATEGORY_LABELS[detectedCategory]}</span>}
             </div>
@@ -295,7 +295,7 @@ function GeneratorWorkspace() {
           {hasAnalyzed && (
             <div className="glass-card builder-card fade-in p-6">
               <div className="section-kicker">02 · SMART REQUIREMENTS</div>
-              <h2 className="mt-2 text-lg font-semibold text-ink">Let's make the first generation accurate.</h2>
+              <h2 className="mt-2 text-lg font-semibold text-ink">Let&apos;s make the first generation accurate.</h2>
               <p className="mt-1 text-sm text-ink-secondary">Appo only asks questions relevant to the type of product you described.</p>
               <div className="mt-5 space-y-5">
                 {smartQuestions.map((q) => (

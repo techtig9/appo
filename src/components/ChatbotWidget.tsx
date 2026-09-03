@@ -55,9 +55,10 @@ export function ChatbotWidget() {
       {open && (
         <div className="card card-elevated mb-3 flex h-[440px] w-[min(340px,calc(100vw-2rem))] animate-scale-in flex-col overflow-hidden">
           <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ai/15 text-ai" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3Z" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-brand-contrast" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M62 150 L100 54 L138 150" />
+                <path d="M77 118 L123 118" />
               </svg>
             </span>
             <p className="text-small font-semibold text-ink">Appo Assistant</p>
@@ -106,8 +107,9 @@ export function ChatbotWidget() {
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         ) : (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="text-ai">
-            <path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3Z" />
+          <svg width="17" height="17" viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-brand">
+            <path d="M62 150 L100 54 L138 150" />
+            <path d="M77 118 L123 118" />
           </svg>
         )}
       </button>

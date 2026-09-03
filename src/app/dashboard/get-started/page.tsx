@@ -30,7 +30,7 @@ export default async function GetStartedPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Go from idea to shipped app.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-secondary">
-            Follow the short path below to experience Appo's core workflow. You can leave this guide at any time and return when you're ready.
+            Follow the short path below to experience Appo&apos;s core workflow. You can leave this guide at any time and return when you&apos;re ready.
           </p>
           <div className="mt-7 max-w-xl">
             <div className="mb-2 flex items-center justify-between text-xs">
@@ -49,7 +49,7 @@ export default async function GetStartedPage() {
           <div className="flex items-start gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-success-subtle text-success">✓</div>
             <div>
-              <h2 className="text-base font-semibold text-ink">You're ready to build at full speed.</h2>
+              <h2 className="text-base font-semibold text-ink">You&apos;re ready to build at full speed.</h2>
               <p className="mt-1 text-sm text-ink-secondary">Your first app has been generated and shipped. Create another project whenever inspiration strikes.</p>
               <Link href="/dashboard/generator" className="btn btn-primary btn-sm mt-4">Build another app →</Link>
             </div>

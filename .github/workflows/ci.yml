@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   verify:
-    name: Typecheck, test and build
+    name: Lint, typecheck, test and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -44,6 +44,12 @@ jobs:
         # which is the check a CI run should be making.
         run: npm ci
 
+      - name: Lint
+        # --max-warnings=0 (see package.json): a warning fails the build.
+        # Warnings that never fail anything accumulate until nobody reads
+        # the output, which is the same as having no linter at all.
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -58,11 +64,6 @@ jobs:
         run: npm run build
 
 # Not run here, and why:
-#
-#   npm run lint — `next lint` with no ESLint config and no ESLint installed
-#   drops into its interactive setup, which hangs a CI runner. Adding
-#   linting means adding eslint + eslint-config-next and a config file
-#   first; that is a separate change, not something to smuggle in here.
 #
 #   The browser QA sweep (responsive, console errors, theme) needs Chromium
 #   and several minutes. It belongs in a scheduled or manually triggered

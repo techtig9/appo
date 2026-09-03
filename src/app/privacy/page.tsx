@@ -5,8 +5,15 @@ export const metadata = { title: "Privacy Policy — appo" };
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-ink">
-      <Link href="/" className="mb-8 inline-block">
-        <img src="/logo-lockup.svg" alt="appo" className="h-8 w-auto" />
+      {/* Icon plus themed HTML text, rather than the lockup SVG. The
+          lockup bakes in a fixed text colour, so it was invisible against
+          one of the two themes; HTML text follows the token. */}
+      <Link href="/" className="mb-8 inline-flex items-center gap-2.5">
+        {/* eslint-disable-next-line @next/next/no-img-element --
+            a local static SVG. next/image cannot optimise a vector, so it
+            would add a request and a required width/height for no gain. */}
+        <img src="/logo-icon.svg" alt="" width={28} height={28} className="h-7 w-7 rounded-md" />
+        <span className="text-lg font-semibold tracking-tight text-ink">Appo</span>
       </Link>
       <h1 className="text-3xl font-extrabold">Privacy Policy</h1>
       <p className="mt-2 text-sm text-ink-muted">Last updated: [DATE — fill in before launch]</p>

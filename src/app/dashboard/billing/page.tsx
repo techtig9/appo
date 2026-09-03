@@ -76,7 +76,7 @@ export default function BillingPage() {
   }
 
   async function cancelSubscription() {
-    if (!confirm("Cancel your subscription? You'll keep access until the end of this billing period, then move to Free.")) return;
+    if (!confirm("Cancel your subscription? You&apos;ll keep access until the end of this billing period, then move to Free.")) return;
     setCancelling(true);
     setMessage("");
     try {
@@ -146,7 +146,7 @@ export default function BillingPage() {
 
       {subscription && subscription.plan !== "free" && <section className="glass-card p-6">
         <h2 className="font-semibold text-ink">Manage subscription</h2>
-        {subscription.status === "cancelled" ? <p className="mt-2 text-sm text-ink-secondary">Cancellation is scheduled. You'll keep your current plan until the billing period ends.</p> : <>
+        {subscription.status === "cancelled" ? <p className="mt-2 text-sm text-ink-secondary">Cancellation is scheduled. You&apos;ll keep your current plan until the billing period ends.</p> : <>
           <p className="mt-2 text-sm text-ink-secondary">Canceling stops future renewal. Your current plan remains active until the end of the paid period.</p>
           <button onClick={cancelSubscription} disabled={cancelling} className="btn-outline mt-4 text-sm text-danger">{cancelling ? "Cancelling…" : "Cancel subscription"}</button>
         </>}
