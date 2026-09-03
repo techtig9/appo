@@ -1,8 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ExpoSnackPreview } from "@/components/ExpoSnackPreview";
 import { CodeEditor } from "@/components/CodeEditor";
+import { GenerationStages } from "@/components/dashboard/GenerationStages";
+import { LoadingState } from "@/components/ui/States";
+import { useToast } from "@/components/ui/Toast";
 import type { GeneratorAnswers } from "@/lib/gemini";
 import type { FollowUpQuestion, AppCategory } from "@/lib/prompt-engineer";
 
@@ -22,7 +26,9 @@ const CATEGORY_LABELS: Record<AppCategory, string> = {
 
 const STEPS = ["Describe", "Plan", "Build", "Preview"];
 
-export default function GeneratorPage() {
+function GeneratorWorkspace() {
+  const params = useSearchParams();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [importMode, setImportMode] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -52,6 +58,56 @@ export default function GeneratorPage() {
   const [activeTab, setActiveTab] = useState<"preview" | "code">("preview");
   const [verification, setVerification] = useState<{ score: number; status: "passed" | "warning" | "failed"; checks: { id: string; label: string; status: "passed" | "warning" | "failed"; detail: string }[]; errors: string[]; warnings: string[] } | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
+  // Lets the user abort a generation that is taking too long. `fetch` is
+  // given the signal, so the request is genuinely cancelled rather than
+  // left running with its result discarded.
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Seeds the builder from ?idea= (the dashboard prompt) or ?template=
+  // (the marketplace). Nothing is generated automatically — the user
+  // reviews and edits the brief first, because generating costs credits.
+  useEffect(() => {
+    if (prefilled) return;
+
+    const idea = params.get("idea");
+    const templateSlug = params.get("template");
+
+    if (idea) {
+      setDescription(idea);
+      setPrefilled(true);
+      return;
+    }
+
+    if (!templateSlug) return;
+    setPrefilled(true);
+
+    let cancelled = false;
+    fetch(`/api/templates/${encodeURIComponent(templateSlug)}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (cancelled || !payload?.generatorSeed) {
+          if (!cancelled) toast({ title: "That template couldn't be loaded", tone: "warning" });
+          return;
+        }
+        const seed = payload.generatorSeed as { name: string; description: string; answers: GeneratorAnswers };
+        setName(seed.name);
+        setDescription(seed.description);
+        setAnswers((current) => ({ ...current, ...seed.answers }));
+        toast({
+          title: `Loaded ${seed.name}`,
+          description: "Edit the brief, then generate when you're ready.",
+          tone: "success",
+        });
+      })
+      .catch(() => {
+        if (!cancelled) toast({ title: "That template couldn't be loaded", tone: "warning" });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [params, prefilled, toast]);
 
   async function handleAnalyze() {
     setAnalyzing(true);
@@ -99,15 +155,22 @@ export default function GeneratorPage() {
   async function handleGenerate() {
     setStatus("generating");
     setErrorMessage("");
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({ name, description, answers, smartAnswers, detectedCategory, importedProject: importedProject ? { source: importedProject.source, ref: importedProject.ref, files: importedProject.files } : undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
         setStatus("error");
+        // The API already writes these for a person to read, and states
+        // plainly whether credits were charged.
         setErrorMessage(data.error ?? "Generation failed.");
         return;
       }
@@ -115,10 +178,27 @@ export default function GeneratorPage() {
       setVerification(null);
       setStatus("idle");
       setActiveTab("preview");
-    } catch {
+      toast({
+        title: `${name || "Your app"} is ready`,
+        description: `${data.project.files.length} files generated.`,
+        tone: "success",
+      });
+    } catch (error) {
+      if (controller.signal.aborted) {
+        setStatus("idle");
+        setErrorMessage("");
+        toast({ title: "Generation cancelled", tone: "info" });
+        return;
+      }
       setStatus("error");
-      setErrorMessage("Network error — please try again.");
+      setErrorMessage("We couldn't reach Appo. Check your connection and try again — nothing was charged.");
+    } finally {
+      abortRef.current = null;
     }
+  }
+
+  function cancelGeneration() {
+    abortRef.current?.abort();
   }
 
   const hasAnalyzed = smartQuestions.length > 0;
@@ -150,13 +230,15 @@ export default function GeneratorPage() {
       <header className="builder-header">
         <div>
           <div className="eyebrow">APPO BUILDER</div>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-white">Turn your idea into a real app.</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+          <h1 className="mt-1 text-page font-semibold tracking-tight text-ink">Turn your idea into a real app.</h1>
+          <p className="mt-2 max-w-2xl text-small leading-relaxed text-ink-secondary">
             Describe the product in plain language. Appo plans the experience first, then generates a working project you can preview and inspect.
           </p>
         </div>
         <div className="builder-status"><span className="status-dot" /> Autosave ready</div>
       </header>
+
+      <GenerationStages active={status === "generating"} onCancel={cancelGeneration} />
 
       <div className="builder-stepper" aria-label="App generation progress">
         {STEPS.map((step, index) => {
@@ -327,5 +409,17 @@ export default function GeneratorPage() {
         </section>
       )}
     </div>
+  );
+}
+
+/**
+ * useSearchParams needs a Suspense boundary; without one this page opts
+ * the whole route out of static rendering and Next fails the build.
+ */
+export default function GeneratorPage() {
+  return (
+    <Suspense fallback={<LoadingState label="Opening the builder…" />}>
+      <GeneratorWorkspace />
+    </Suspense>
   );
 }

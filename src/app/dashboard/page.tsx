@@ -4,71 +4,189 @@ import { approximateMonthlyAppCapacity } from "@/lib/credits";
 import { getLowCreditWarning } from "@/lib/account-lifecycle";
 import { computeOnboardingProgress } from "@/lib/onboarding";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
+import { DashboardPrompt } from "@/components/dashboard/DashboardPrompt";
+import { Card, MetricCard } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/States";
+import type { PlanId } from "@/lib/supabase/types";
+
+/**
+ * Workspace overview.
+ *
+ * A bug fixed here: the "Recent apps" query selected a `description`
+ * column that does not exist on `apps`. PostgREST rejects the whole
+ * select, so `apps` came back null and the panel showed its empty state to
+ * every user, forever — including users with a dozen projects. Same class
+ * of defect as the one that made AI editing return "App not found": the
+ * minimal Database type does not type `.select()` strings, so nothing
+ * caught either of them.
+ */
 
 export default async function DashboardPage() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const [{ data: subscription }, { data: profile }, { data: apps }, { data: deployments }] = await Promise.all([
-    supabase.from("subscriptions").select("plan, credits_remaining, credits_granted").eq("user_id", user?.id ?? "").single(),
-    supabase.from("users").select("onboarding_completed").eq("id", user?.id ?? "").single(),
-    supabase.from("apps").select("id, name, description").eq("user_id", user?.id ?? "").order("created_at", { ascending: false }).limit(5),
-    supabase.from("deployments").select("id").eq("platform", "web"),
-  ]);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id ?? "";
 
+  const [{ data: subscription }, { data: profile }, { data: apps }, { count: deploymentCount }, { count: appCount }] =
+    await Promise.all([
+      supabase.from("subscriptions").select("plan, credits_remaining, credits_granted").eq("user_id", userId).maybeSingle(),
+      supabase.from("users").select("name, onboarding_completed").eq("id", userId).maybeSingle(),
+      supabase
+        .from("apps")
+        .select("id, name, folder, platforms, created_at, is_favorite")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      // Counted rather than fetched: the panel only needs the number, and
+      // RLS already scopes deployments to this user's apps.
+      supabase.from("deployments").select("id", { count: "exact", head: true }),
+      supabase.from("apps").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    ]);
+
+  const totalApps = appCount ?? 0;
   const warning = subscription ? getLowCreditWarning(subscription.credits_remaining, subscription.credits_granted) : null;
-  const onboarding = computeOnboardingProgress(apps?.length ?? 0, (deployments?.length ?? 0) > 0);
+  const onboarding = computeOnboardingProgress(totalApps, (deploymentCount ?? 0) > 0);
   const showOnboarding = !profile?.onboarding_completed && !onboarding.allDone;
-  const plan = subscription?.plan ?? "free";
+
+  const plan = (subscription?.plan ?? "free") as PlanId;
   const credits = subscription?.credits_remaining ?? 0;
   const granted = subscription?.credits_granted ?? 0;
-  const usage = granted > 0 ? Math.min(100, Math.round(((granted - credits) / granted) * 100)) : 0;
+  const usedPercent = granted > 0 ? Math.min(100, Math.round(((granted - credits) / granted) * 100)) : 0;
+
+  const firstName = (profile?.name ?? (user?.user_metadata?.full_name as string | undefined) ?? "").split(/\s+/)[0];
 
   return (
-    <div className="fade-in space-y-8">
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-violet/15 via-[#12101f] to-fuchsia/10 p-6 sm:p-8">
-        <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-violet/20 blur-[80px]"/>
-        <div className="relative max-w-3xl">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet/20 bg-violet/10 px-3 py-1 text-[11px] font-medium text-violet-200"><span className="h-1.5 w-1.5 rounded-full bg-violet"/> AI-powered workspace</div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">What will you build today?</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">Describe an app in plain language. Appo helps turn the idea into a real project you can preview, refine and ship.</p>
-          <Link href="/dashboard/generator" className="btn-accent mt-6 inline-flex items-center gap-2 text-sm">Start building with AI <span>→</span></Link>
-        </div>
+    <div className="space-y-8">
+      <section>
+        <p className="eyebrow">{greeting()}{firstName ? `, ${firstName}` : ""}</p>
+        <h1 className="mt-2 text-page font-semibold tracking-tight text-ink">What are you building today?</h1>
+        <p className="mt-2 max-w-2xl text-small leading-relaxed text-ink-secondary">
+          Describe an app in plain language. Appo plans it, builds it, and gives you a workspace to refine it.
+        </p>
+        <DashboardPrompt className="mt-5" />
       </section>
 
-      {showOnboarding && <OnboardingChecklist steps={onboarding.steps} />}
-      {warning?.show && <div className={`rounded-2xl border p-4 text-sm ${warning.level === "critical" ? "border-fuchsia-400/30 bg-fuchsia-500/5 text-fuchsia-100" : "border-violet/30 bg-violet-500/5 text-violet-100"}`}>{warning.message} <Link href="/dashboard/billing" className="ml-1 font-semibold underline">Manage plan</Link></div>}
+      {showOnboarding ? <OnboardingChecklist steps={onboarding.steps} /> : null}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric title="Current plan" value={plan} detail="Your active subscription" />
-        <Metric title="AI credits" value={credits.toLocaleString()} detail={granted ? `${usage}% used this cycle` : "No monthly allocation"} progress={granted ? usage : undefined} />
-        <Metric title="Apps" value={String(apps?.length ?? 0)} detail="Projects in your workspace" />
-        <Metric title="Build capacity" value={`~${subscription ? approximateMonthlyAppCapacity(plan as "free" | "starter" | "pro" | "business") : 0}`} detail="Estimated full apps / cycle" />
+      {warning?.show ? (
+        <Card variant="status" tone={warning.level === "critical" ? "danger" : "warning"} className="flex flex-wrap items-center gap-3 p-4">
+          <p className="min-w-0 flex-1 text-small text-ink">{warning.message}</p>
+          <Link href="/dashboard/billing" className="btn btn-secondary btn-sm">
+            Manage plan
+          </Link>
+        </Card>
+      ) : null}
+
+      <section aria-label="Workspace summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="Plan" value={<span className="capitalize">{plan}</span>} hint="Current subscription" />
+        <MetricCard
+          label="Credits left"
+          value={credits.toLocaleString("en-GB")}
+          hint={granted ? `${usedPercent}% of this cycle used` : "No monthly allowance"}
+        />
+        <MetricCard label="Projects" value={totalApps} hint="In your workspace" />
+        <MetricCard
+          label="Deployments"
+          value={deploymentCount ?? 0}
+          hint={`About ${approximateMonthlyAppCapacity(plan)} full builds a month on this plan`}
+        />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <div className="glass-card p-5 sm:p-6">
-          <div className="flex items-center justify-between"><div><h2 className="text-base font-semibold">Recent apps</h2><p className="mt-1 text-xs text-slate-500">Continue where you left off.</p></div><Link href="/dashboard/apps" className="text-xs font-medium text-violet-200 hover:text-white">View all →</Link></div>
-          <div className="mt-5 space-y-2">
-            {(apps ?? []).length === 0 ? <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center"><div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-violet/10 text-violet">✦</div><p className="mt-3 text-sm font-medium">Your first app starts here</p><p className="mt-1 text-xs text-slate-500">Use the AI Builder to turn an idea into a project.</p><Link href="/dashboard/generator" className="btn-accent mt-4 inline-flex text-xs">Create an app</Link></div> : apps?.map((app: { id: string; name: string | null; description: string | null }) => <Link key={app.id} href={`/dashboard/apps`} className="data-row flex items-center gap-3 rounded-2xl border border-transparent bg-white/[.025] p-3 transition hover:border-white/10 hover:bg-white/[.05]"><span className="thumb-tile h-10 w-10 shrink-0">{(app.name ?? "A").slice(0,1).toUpperCase()}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-white">{app.name ?? "Untitled app"}</p><p className="truncate text-xs text-slate-500">{app.description ?? "No description"}</p></div><span className="text-xs text-slate-600">Open →</span></Link>)}</div>
-        </div>
-        <div className="glass-card p-5 sm:p-6">
-          <h2 className="text-base font-semibold">Quick actions</h2><p className="mt-1 text-xs text-slate-500">Jump straight into your workflow.</p>
-          <div className="mt-5 grid gap-2">
-            <QuickAction href="/dashboard/generator" icon="✦" title="Build with AI" detail="Describe a new application" />
-            <QuickAction href="/dashboard/templates" icon="◇" title="Start from a template" detail="Use a proven starting point" />
-            <QuickAction href="/dashboard/apps" icon="□" title="Manage your apps" detail="Versions, sharing and exports" />
-            <QuickAction href="/dashboard/billing" icon="↗" title="View usage & billing" detail="Plan, credits and invoices" />
+      <section className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
+        <Card className="p-5">
+          <div className="flex items-baseline justify-between gap-4">
+            <div>
+              <h2 className="text-card font-semibold tracking-tight text-ink">Recent projects</h2>
+              <p className="mt-0.5 text-caption text-ink-muted">Pick up where you left off.</p>
+            </div>
+            {totalApps > 0 ? (
+              <Link href="/dashboard/apps" className="text-caption font-medium text-brand underline-offset-4 hover:underline">
+                View all
+              </Link>
+            ) : null}
           </div>
-        </div>
+
+          <div className="mt-4">
+            {(apps ?? []).length === 0 ? (
+              <EmptyState
+                title="No projects yet"
+                description="Describe an app above, or start from one of the 64 templates in the marketplace."
+                action={{ label: "Browse templates", href: "/dashboard/templates" }}
+                className="border-0 py-10"
+              />
+            ) : (
+              <ul className="divide-y divide-line overflow-hidden rounded-md border border-line">
+                {apps!.map((app) => (
+                  <li key={app.id}>
+                    <Link href={`/dashboard/apps/${app.id}`} className="data-row flex items-center gap-3 px-3.5 py-3">
+                      <span className="thumb-tile h-9 w-9 shrink-0" aria-hidden="true">
+                        {(app.name ?? "A").slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1.5">
+                          <span className="truncate text-small font-medium text-ink">{app.name ?? "Untitled project"}</span>
+                          {app.is_favorite ? (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Favourite" className="shrink-0 text-brand">
+                              <path d="M12 4.8 13.9 9l4.6.4-3.5 3 1.1 4.5L12 14.6 7.9 16.9 9 12.4l-3.5-3L10.1 9 12 4.8Z" />
+                            </svg>
+                          ) : null}
+                        </span>
+                        <span className="mt-0.5 block truncate text-caption text-ink-muted">
+                          {app.folder ? `${app.folder} · ` : ""}
+                          {(app.platforms ?? ["web"]).join(", ")}
+                          {app.created_at ? ` · created ${new Date(app.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}` : ""}
+                        </span>
+                      </span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="shrink-0 text-ink-muted">
+                        <path d="m9 6 6 6-6 6" />
+                      </svg>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="text-card font-semibold tracking-tight text-ink">Quick actions</h2>
+          <p className="mt-0.5 text-caption text-ink-muted">
+            Press <kbd className="kbd">⌘</kbd> <kbd className="kbd">K</kbd> for the command palette.
+          </p>
+          <div className="mt-4 grid gap-1.5">
+            <QuickAction href="/dashboard/generator" title="Build with AI" detail="Describe a new application" />
+            <QuickAction href="/dashboard/templates" title="Start from a template" detail="64 starting points" />
+            <QuickAction href="/dashboard/deployments" title="Deployments" detail="Releases and status" />
+            <QuickAction href="/dashboard/billing" title="Usage and billing" detail="Plan, credits and invoices" />
+          </div>
+        </Card>
       </section>
     </div>
   );
 }
 
-function Metric({ title, value, detail, progress }: { title: string; value: string; detail: string; progress?: number }) {
-  return <div className="glass-card p-5"><p className="text-xs text-slate-500">{title}</p><p className="mt-2 text-2xl font-bold capitalize tracking-tight text-white">{value}</p><p className="mt-1 text-[11px] text-slate-500">{detail}</p>{progress !== undefined && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/5"><div className="h-full rounded-full bg-gradient-to-r from-violet to-fuchsia" style={{ width: `${progress}%` }}/></div>}</div>;
+/** Server-rendered, so this is the server's clock, not the viewer's. */
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
-function QuickAction({ href, icon, title, detail }: { href: string; icon: string; title: string; detail: string }) {
-  return <Link href={href} className="group flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[.02] p-3 transition hover:border-violet/20 hover:bg-violet/5"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet/10 text-violet-200">{icon}</span><span className="min-w-0 flex-1"><span className="block text-sm font-medium text-slate-200 group-hover:text-white">{title}</span><span className="block text-[11px] text-slate-500">{detail}</span></span><span className="text-slate-600 group-hover:text-violet-200">→</span></Link>;
+function QuickAction({ href, title, detail }: { href: string; title: string; detail: string }) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-3 rounded-md border border-line px-3 py-2.5 transition-colors duration-micro hover:border-line-strong hover:bg-canvas-subtle"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-small font-medium text-ink">{title}</span>
+        <span className="block text-caption text-ink-muted">{detail}</span>
+      </span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="shrink-0 text-ink-muted transition-transform duration-micro group-hover:translate-x-0.5">
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </Link>
+  );
 }
