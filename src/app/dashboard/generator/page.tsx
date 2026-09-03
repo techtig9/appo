@@ -259,8 +259,8 @@ function GeneratorWorkspace() {
             <div className="section-kicker">01 · PRODUCT BRIEF</div>
             <div className="mt-3 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-white">What are you building?</h2>
-                <p className="mt-1 text-sm text-slate-400">Start with the outcome. You don't need to know how to code.</p>
+                <h2 className="text-lg font-semibold text-ink">What are you building?</h2>
+                <p className="mt-1 text-sm text-ink-secondary">Start with the outcome. You don't need to know how to code.</p>
               </div>
               {detectedCategory && <span className="category-chip">{CATEGORY_LABELS[detectedCategory]}</span>}
             </div>
@@ -279,24 +279,24 @@ function GeneratorWorkspace() {
 
           <div className="glass-card builder-card p-6">
             <div className="flex items-center justify-between gap-4">
-              <div><div className="section-kicker">OPTIONAL · IMPORT & EXTEND</div><h2 className="mt-2 text-lg font-semibold text-white">Already have an app?</h2><p className="mt-1 text-sm text-slate-400">Import a public GitHub repository or ZIP, then ask Appo to extend it.</p></div>
+              <div><div className="section-kicker">OPTIONAL · IMPORT & EXTEND</div><h2 className="mt-2 text-lg font-semibold text-ink">Already have an app?</h2><p className="mt-1 text-sm text-ink-secondary">Import a public GitHub repository or ZIP, then ask Appo to extend it.</p></div>
               <button onClick={() => setImportMode(!importMode)} className="btn-outline">{importMode ? "Hide" : "Import existing app"}</button>
             </div>
             {importMode && <div className="mt-5 space-y-4">
               <label className="field-label">GitHub repository URL<input value={githubUrl} onChange={e => setGithubUrl(e.target.value)} placeholder="https://github.com/owner/repository" className="builder-input" /></label>
-              <div className="text-center text-xs text-slate-600">or</div>
-              <label className="field-label">Project ZIP<input type="file" accept=".zip,application/zip" onChange={e => setImportFile(e.target.files?.[0] || null)} className="builder-input file:mr-3 file:rounded-lg file:border-0 file:bg-violet-500/10 file:px-3 file:py-2 file:text-xs file:text-violet-200" /></label>
+              <div className="text-center text-xs text-ink-muted">or</div>
+              <label className="field-label">Project ZIP<input type="file" accept=".zip,application/zip" onChange={e => setImportFile(e.target.files?.[0] || null)} className="builder-input file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/10 file:px-3 file:py-2 file:text-xs file:text-brand" /></label>
               <button onClick={handleImport} disabled={importing || (!importFile && !githubUrl.trim())} className="btn-accent w-full disabled:opacity-50">{importing ? "Importing source…" : "Import source →"}</button>
-              {importMessage && <p className="text-xs text-violet-200">{importMessage}</p>}
-              {importedProject && <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-xs text-emerald-100"><strong>{importedProject.ref}</strong><span className="ml-2 text-emerald-300/70">{importedProject.files.length} files ready for AI extension</span></div>}
+              {importMessage && <p className="text-xs text-brand">{importMessage}</p>}
+              {importedProject && <div className="rounded-2xl border border-success/35 bg-success-subtle p-4 text-xs text-emerald-100"><strong>{importedProject.ref}</strong><span className="ml-2 text-success/70">{importedProject.files.length} files ready for AI extension</span></div>}
             </div>}
           </div>
 
           {hasAnalyzed && (
             <div className="glass-card builder-card fade-in p-6">
               <div className="section-kicker">02 · SMART REQUIREMENTS</div>
-              <h2 className="mt-2 text-lg font-semibold text-white">Let's make the first generation accurate.</h2>
-              <p className="mt-1 text-sm text-slate-400">Appo only asks questions relevant to the type of product you described.</p>
+              <h2 className="mt-2 text-lg font-semibold text-ink">Let's make the first generation accurate.</h2>
+              <p className="mt-1 text-sm text-ink-secondary">Appo only asks questions relevant to the type of product you described.</p>
               <div className="mt-5 space-y-5">
                 {smartQuestions.map((q) => (
                   <div key={q.id} className="question-block">
@@ -318,7 +318,7 @@ function GeneratorWorkspace() {
             <div className="glass-card builder-card fade-in p-6">
               <div className="section-kicker">03 · BUILD SETTINGS</div>
               <div className="mt-2 flex items-center justify-between gap-4">
-                <div><h2 className="text-lg font-semibold text-white">Technical preferences</h2><p className="mt-1 text-sm text-slate-400">Use sensible defaults or tune the generated experience.</p></div>
+                <div><h2 className="text-lg font-semibold text-ink">Technical preferences</h2><p className="mt-1 text-sm text-ink-secondary">Use sensible defaults or tune the generated experience.</p></div>
                 <span className="mini-stat">{selectedPlatforms}</span>
               </div>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -353,7 +353,7 @@ function GeneratorWorkspace() {
         <aside className="builder-side space-y-5">
           <div className="glass-card builder-card p-5">
             <div className="section-kicker">APP PLAN</div>
-            <h3 className="mt-2 text-base font-semibold text-white">What Appo is preparing</h3>
+            <h3 className="mt-2 text-base font-semibold text-ink">What Appo is preparing</h3>
             <div className="plan-list mt-4">
               {[
                 ["Experience", detectedCategory ? CATEGORY_LABELS[detectedCategory] : "Waiting for your brief"],
@@ -372,8 +372,8 @@ function GeneratorWorkspace() {
           <div className="glass-card builder-card p-5">
             <div className="section-kicker">GENERATION QUALITY</div>
             <div className="quality-meter mt-4"><span style={{ width: `${verification ? verification.score : project ? 88 : hasAnalyzed ? 72 : 24}%` }} /></div>
-            <div className="mt-3 flex items-center justify-between"><span className="text-sm text-slate-400">Readiness</span><strong className="text-sm text-white">{verification ? `${verification.score}/100` : project ? "Generated" : hasAnalyzed ? "Good" : "Getting started"}</strong></div>
-            <div className="mt-4 space-y-2 text-xs text-slate-400">
+            <div className="mt-3 flex items-center justify-between"><span className="text-sm text-ink-secondary">Readiness</span><strong className="text-sm text-ink">{verification ? `${verification.score}/100` : project ? "Generated" : hasAnalyzed ? "Good" : "Getting started"}</strong></div>
+            <div className="mt-4 space-y-2 text-xs text-ink-secondary">
               <p>✓ Requirements captured</p><p>✓ Adaptive questions</p><p>✓ Project generation pipeline</p><p>✓ Full-stack architecture mapped</p><p>{verification ? (verification.status === "passed" ? "✓" : "⚠") : "○"} Automated verification {verification ? "completed" : "ready"}</p>
             </div>
           </div>
@@ -383,7 +383,7 @@ function GeneratorWorkspace() {
       {project && (
         <section className="glass-card builder-workspace fade-in overflow-hidden">
           <div className="workspace-toolbar">
-            <div><div className="section-kicker">04 · LIVE WORKSPACE</div><h2 className="mt-1 text-lg font-semibold text-white">{name || "Your App"}</h2></div>
+            <div><div className="section-kicker">04 · LIVE WORKSPACE</div><h2 className="mt-1 text-lg font-semibold text-ink">{name || "Your App"}</h2></div>
             <div className="workspace-actions">
               <button className={activeTab === "preview" ? "workspace-tab is-active" : "workspace-tab"} onClick={() => setActiveTab("preview")}>Preview</button>
               <button className={activeTab === "code" ? "workspace-tab is-active" : "workspace-tab"} onClick={() => setActiveTab("code")}>Code</button>
@@ -395,15 +395,15 @@ function GeneratorWorkspace() {
           </div>
           <div className="workspace-footer"><span><span className="status-dot" /> Generation completed</span><span>{project.files.length} project files · {project.summary}</span></div>
           {verification && (
-            <div className="border-t border-white/[.06] p-5">
+            <div className="border-t border-line p-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <div><div className="section-kicker">AUTOMATED VERIFICATION</div><h3 className="mt-1 text-base font-semibold text-white">{verification.score}/100 · {verification.status === "passed" ? "Ready for review" : verification.status === "warning" ? "Review recommended" : "Fix issues before shipping"}</h3></div>
-                <div className={`rounded-full border px-3 py-1 text-xs font-semibold ${verification.status === "passed" ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-200" : verification.status === "warning" ? "border-amber-400/20 bg-amber-400/10 text-amber-200" : "border-rose-400/20 bg-rose-400/10 text-rose-200"}`}>{verification.status.toUpperCase()}</div>
+                <div><div className="section-kicker">AUTOMATED VERIFICATION</div><h3 className="mt-1 text-base font-semibold text-ink">{verification.score}/100 · {verification.status === "passed" ? "Ready for review" : verification.status === "warning" ? "Review recommended" : "Fix issues before shipping"}</h3></div>
+                <div className={`rounded-full border px-3 py-1 text-xs font-semibold ${verification.status === "passed" ? "border-success/35 bg-success-subtle text-success" : verification.status === "warning" ? "border-warning/35 bg-warning-subtle text-warning" : "border-danger/35 bg-danger-subtle text-danger"}`}>{verification.status.toUpperCase()}</div>
               </div>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {verification.checks.map((check) => <div key={check.id} className="rounded-xl border border-white/8 bg-white/[.02] p-3"><div className="flex items-center justify-between gap-3"><strong className="text-xs text-slate-200">{check.label}</strong><span className="text-[10px] uppercase tracking-wider text-slate-500">{check.status}</span></div><p className="mt-1 text-xs leading-5 text-slate-500">{check.detail}</p></div>)}
+                {verification.checks.map((check) => <div key={check.id} className="rounded-xl border border-line bg-canvas-subtle p-3"><div className="flex items-center justify-between gap-3"><strong className="text-xs text-ink">{check.label}</strong><span className="text-[10px] uppercase tracking-wider text-ink-muted">{check.status}</span></div><p className="mt-1 text-xs leading-5 text-ink-muted">{check.detail}</p></div>)}
               </div>
-              {(verification.errors.length > 0 || verification.warnings.length > 0) && <div className="mt-4 space-y-2">{verification.errors.map((item) => <p key={item} className="text-xs text-rose-300">Error: {item}</p>)}{verification.warnings.map((item) => <p key={item} className="text-xs text-amber-300">Warning: {item}</p>)}</div>}
+              {(verification.errors.length > 0 || verification.warnings.length > 0) && <div className="mt-4 space-y-2">{verification.errors.map((item) => <p key={item} className="text-xs text-danger">Error: {item}</p>)}{verification.warnings.map((item) => <p key={item} className="text-xs text-warning">Warning: {item}</p>)}</div>}
             </div>
           )}
         </section>

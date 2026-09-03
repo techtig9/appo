@@ -18,12 +18,12 @@ export function ExpoSnackPreview({ files, snackName }: ExpoSnackPreviewProps) {
     <div className="glass-card flex flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">Live Preview</h3>
-        <span className="text-xs text-slate-400">Scan the QR code with Expo Go on your phone</span>
+        <span className="text-xs text-ink-secondary">Scan the QR code with Expo Go on your phone</span>
       </div>
       <iframe
         title="Expo Snack Preview"
         src={snackUrl}
-        className="h-[600px] w-full rounded-2xl border border-white/10"
+        className="h-[600px] w-full rounded-2xl border border-line"
         allow="geolocation; camera; microphone"
       />
     </div>

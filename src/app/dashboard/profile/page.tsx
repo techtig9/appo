@@ -43,14 +43,14 @@ export default function ProfilePage() {
 
   return (
     <div className="fade-in space-y-6">
-      <h1 className="text-2xl font-semibold text-white">Profile</h1>
+      <h1 className="text-2xl font-semibold text-ink">Profile</h1>
 
       <div className="glass-card space-y-4 p-6">
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-deep to-fuchsia-500" />
           <div>
             <p className="font-semibold">{profile?.name || "Unnamed"}</p>
-            <p className="text-sm text-slate-400">{profile?.email}</p>
+            <p className="text-sm text-ink-secondary">{profile?.email}</p>
           </div>
         </div>
 
@@ -66,8 +66,8 @@ export default function ProfilePage() {
           {saving ? "Saving…" : saved ? "Saved" : "Save changes"}
         </button>
 
-        <div className="border-t border-white/10 pt-4 text-sm text-slate-400">
-          <p>Role: <span className="capitalize text-slate-200">{profile?.role}</span></p>
+        <div className="border-t border-line pt-4 text-sm text-ink-secondary">
+          <p>Role: <span className="capitalize text-ink">{profile?.role}</span></p>
           {profile?.created_at && (
             <p className="mt-1">Member since {new Date(profile.created_at).toLocaleDateString()}</p>
           )}

@@ -95,45 +95,45 @@ export default function BillingPage() {
   return (
     <div className="fade-in space-y-6 pb-10">
       <div>
-        <p className="text-sm font-medium text-violet-300">Workspace billing</p>
-        <h1 className="mt-1 text-3xl font-semibold text-white">Plans & usage</h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-400">Manage your Appo plan, monitor AI credits, and upgrade when your projects need more power.</p>
+        <p className="text-sm font-medium text-brand">Workspace billing</p>
+        <h1 className="mt-1 text-3xl font-semibold text-ink">Plans & usage</h1>
+        <p className="mt-2 max-w-2xl text-sm text-ink-secondary">Manage your Appo plan, monitor AI credits, and upgrade when your projects need more power.</p>
       </div>
 
-      {message && <div className="glass-card border-violet/30 p-4 text-sm text-slate-200">{message}</div>}
+      {message && <div className="glass-card border-brand-border p-4 text-sm text-ink">{message}</div>}
 
-      {warning?.show && <div className="glass-card border-violet/30 p-4 text-sm text-violet-200">{warning.message}</div>}
+      {warning?.show && <div className="glass-card border-brand-border p-4 text-sm text-brand">{warning.message}</div>}
 
       <section className="glass-card p-6">
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
           <div>
-            <p className="text-sm text-slate-400">Current plan</p>
+            <p className="text-sm text-ink-secondary">Current plan</p>
             <div className="mt-1 flex items-center gap-3">
-              <h2 className="text-2xl font-semibold text-white">{subscription ? PLANS[subscription.plan].label : "Loading…"}</h2>
-              {subscription && <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs capitalize text-slate-300">{subscription.status.replace("_", " ")}</span>}
+              <h2 className="text-2xl font-semibold text-ink">{subscription ? PLANS[subscription.plan].label : "Loading…"}</h2>
+              {subscription && <span className="rounded-full bg-canvas-subtle px-2.5 py-1 text-xs capitalize text-ink-secondary">{subscription.status.replace("_", " ")}</span>}
             </div>
           </div>
-          {subscription?.renews_at && <div className="text-sm text-slate-400">Renews <span className="text-white">{new Date(subscription.renews_at).toLocaleDateString()}</span></div>}
+          {subscription?.renews_at && <div className="text-sm text-ink-secondary">Renews <span className="text-ink">{new Date(subscription.renews_at).toLocaleDateString()}</span></div>}
         </div>
         {subscription && <div className="mt-6">
-          <div className="mb-2 flex justify-between text-sm"><span className="text-slate-400">AI credits used</span><span className="text-white">{usedCredits.toLocaleString()} / {subscription.credits_granted.toLocaleString()}</span></div>
-          <div className="h-3 overflow-hidden rounded-full bg-white/5"><div className={`h-full rounded-full ${creditStatus === "critical" ? "bg-fuchsia-400" : creditStatus === "low" ? "bg-amber-400" : "bg-violet"}`} style={{ width: `${usedPct}%` }} /></div>
-          <div className="mt-2 flex justify-between text-xs text-slate-500"><span>{usedPct}% used</span><span>{subscription.credits_remaining.toLocaleString()} remaining</span></div>
+          <div className="mb-2 flex justify-between text-sm"><span className="text-ink-secondary">AI credits used</span><span className="text-ink">{usedCredits.toLocaleString()} / {subscription.credits_granted.toLocaleString()}</span></div>
+          <div className="h-3 overflow-hidden rounded-full bg-canvas-subtle"><div className={`h-full rounded-full ${creditStatus === "critical" ? "bg-danger" : creditStatus === "low" ? "bg-amber-400" : "bg-brand"}`} style={{ width: `${usedPct}%` }} /></div>
+          <div className="mt-2 flex justify-between text-xs text-ink-muted"><span>{usedPct}% used</span><span>{subscription.credits_remaining.toLocaleString()} remaining</span></div>
         </div>}
       </section>
 
       <section>
-        <div className="mb-4"><h2 className="text-xl font-semibold text-white">Choose your plan</h2><p className="mt-1 text-sm text-slate-400">Upgrade instantly through Paddle. Your Appo subscription is updated after the verified billing webhook.</p></div>
+        <div className="mb-4"><h2 className="text-xl font-semibold text-ink">Choose your plan</h2><p className="mt-1 text-sm text-ink-secondary">Upgrade instantly through Paddle. Your Appo subscription is updated after the verified billing webhook.</p></div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {planCards.map((plan) => {
             const current = subscription?.plan === plan.id;
             const popular = plan.id === "pro";
-            return <div key={plan.id} className={`glass-card relative flex flex-col p-6 ${popular ? "border-violet/50 shadow-lg shadow-violet/5" : ""}`}>
-              {popular && <span className="absolute right-5 top-5 rounded-full bg-violet/15 px-2.5 py-1 text-xs font-medium text-violet-200">Most popular</span>}
-              <h3 className="text-lg font-semibold text-white">{plan.label}</h3>
-              <p className="mt-3 text-3xl font-bold text-white">${plan.priceMonthlyCents / 100}<span className="text-sm font-normal text-slate-500">/month</span></p>
-              <p className="mt-2 text-sm text-slate-400">{plan.monthlyCredits.toLocaleString()} AI credits every billing cycle.</p>
-              <div className="mt-5 space-y-2 text-sm text-slate-300">
+            return <div key={plan.id} className={`glass-card relative flex flex-col p-6 ${popular ? "border-brand-border shadow-lg shadow-sm" : ""}`}>
+              {popular && <span className="absolute right-5 top-5 rounded-full bg-brand-subtle px-2.5 py-1 text-xs font-medium text-brand">Most popular</span>}
+              <h3 className="text-lg font-semibold text-ink">{plan.label}</h3>
+              <p className="mt-3 text-3xl font-bold text-ink">${plan.priceMonthlyCents / 100}<span className="text-sm font-normal text-ink-muted">/month</span></p>
+              <p className="mt-2 text-sm text-ink-secondary">{plan.monthlyCredits.toLocaleString()} AI credits every billing cycle.</p>
+              <div className="mt-5 space-y-2 text-sm text-ink-secondary">
                 {Object.entries(plan.features).filter(([, enabled]) => enabled).slice(0, 6).map(([feature]) => <p key={feature}>✓ {feature.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase())}</p>)}
               </div>
               <button disabled={current || loadingPlan !== null} onClick={() => openCheckout(plan.id)} className="btn-accent mt-6 w-full text-sm disabled:cursor-not-allowed disabled:opacity-50">
@@ -145,10 +145,10 @@ export default function BillingPage() {
       </section>
 
       {subscription && subscription.plan !== "free" && <section className="glass-card p-6">
-        <h2 className="font-semibold text-white">Manage subscription</h2>
-        {subscription.status === "cancelled" ? <p className="mt-2 text-sm text-slate-400">Cancellation is scheduled. You'll keep your current plan until the billing period ends.</p> : <>
-          <p className="mt-2 text-sm text-slate-400">Canceling stops future renewal. Your current plan remains active until the end of the paid period.</p>
-          <button onClick={cancelSubscription} disabled={cancelling} className="btn-outline mt-4 text-sm text-fuchsia-300">{cancelling ? "Cancelling…" : "Cancel subscription"}</button>
+        <h2 className="font-semibold text-ink">Manage subscription</h2>
+        {subscription.status === "cancelled" ? <p className="mt-2 text-sm text-ink-secondary">Cancellation is scheduled. You'll keep your current plan until the billing period ends.</p> : <>
+          <p className="mt-2 text-sm text-ink-secondary">Canceling stops future renewal. Your current plan remains active until the end of the paid period.</p>
+          <button onClick={cancelSubscription} disabled={cancelling} className="btn-outline mt-4 text-sm text-danger">{cancelling ? "Cancelling…" : "Cancel subscription"}</button>
         </>}
       </section>}
     </div>

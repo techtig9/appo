@@ -168,8 +168,8 @@ export default function AppsPage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="eyebrow">PROJECT WORKSPACE</div>
-          <h1 className="mt-1 text-2xl font-semibold text-white">Your Apps</h1>
-          <p className="mt-1 text-sm text-slate-400">{apps.length} project{apps.length === 1 ? "" : "s"} in your workspace</p>
+          <h1 className="mt-1 text-2xl font-semibold text-ink">Your Apps</h1>
+          <p className="mt-1 text-sm text-ink-secondary">{apps.length} project{apps.length === 1 ? "" : "s"} in your workspace</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -189,20 +189,20 @@ export default function AppsPage() {
             <option value="name">Name A–Z</option>
           </select>
           <div className="glass-card flex overflow-hidden p-1">
-            <button onClick={() => setView("grid")} className={`rounded-lg px-2 py-1 text-xs ${view === "grid" ? "bg-white/10 text-white" : "text-slate-500"}`} aria-label="Grid view">▦</button>
-            <button onClick={() => setView("list")} className={`rounded-lg px-2 py-1 text-xs ${view === "list" ? "bg-white/10 text-white" : "text-slate-500"}`} aria-label="List view">☰</button>
+            <button onClick={() => setView("grid")} className={`rounded-lg px-2 py-1 text-xs ${view === "grid" ? "bg-canvas-subtle text-ink" : "text-ink-muted"}`} aria-label="Grid view">▦</button>
+            <button onClick={() => setView("list")} className={`rounded-lg px-2 py-1 text-xs ${view === "list" ? "bg-canvas-subtle text-ink" : "text-ink-muted"}`} aria-label="List view">☰</button>
           </div>
         </div>
       </div>
 
-      {loading && <p className="text-white/80">Loading…</p>}
+      {loading && <p className="text-ink/80">Loading…</p>}
 
       <div className={view === "grid" ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" : "space-y-3"}>
         {!loading && sortedApps.length === 0 && (
           <div className="glass-card col-span-full flex flex-col items-center justify-center px-6 py-16 text-center">
             <div className="mb-4 text-4xl">⌘</div>
-            <h2 className="text-lg font-semibold text-white">{search ? "No matching apps" : "Your workspace is empty"}</h2>
-            <p className="mt-2 max-w-md text-sm text-slate-400">
+            <h2 className="text-lg font-semibold text-ink">{search ? "No matching apps" : "Your workspace is empty"}</h2>
+            <p className="mt-2 max-w-md text-sm text-ink-secondary">
               {search ? "Try another name or tag." : "Create your first app with Appo's AI Builder and it will appear here."}
             </p>
             {!search && <Link href="/dashboard/generator" className="btn-accent mt-5">Create your first app</Link>}
@@ -211,30 +211,30 @@ export default function AppsPage() {
         {sortedApps.map((app) => (
           <div key={app.id} className={`glass-card space-y-2 p-5 ${view === "list" ? "data-row" : ""}`}>
             <div className="flex items-center justify-between">
-              <Link href={`/dashboard/apps/${app.id}`} className="flex items-center gap-3 font-semibold hover:text-violet-200">
+              <Link href={`/dashboard/apps/${app.id}`} className="flex items-center gap-3 font-semibold hover:text-brand">
                 <span className="thumb-tile h-9 w-9 shrink-0 text-xs">{app.name.slice(0, 2).toUpperCase()}</span>
                 {app.name}
               </Link>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => togglePublishTemplate(app.id)}
-                  className={`text-xs underline ${app.is_public_template ? "text-violet" : "text-slate-500"}`}
+                  className={`text-xs underline ${app.is_public_template ? "text-brand" : "text-ink-muted"}`}
                 >
                   {app.is_public_template ? "Public template" : "Publish to gallery"}
                 </button>
                 <button
                   onClick={() => toggleFavorite(app.id)}
                   aria-label={app.is_favorite ? "Remove from favorites" : "Add to favorites"}
-                  className={`text-lg transition ${app.is_favorite ? "text-amber-400" : "text-slate-500 hover:text-amber-300"}`}
+                  className={`text-lg transition ${app.is_favorite ? "text-warning" : "text-ink-muted hover:text-warning"}`}
                 >
                   {app.is_favorite ? "★" : "☆"}
                 </button>
               </div>
             </div>
-            <Link href={`/dashboard/apps/${app.id}`} className="block text-xs text-slate-400 hover:text-slate-200">v{app.version} · build #{app.build_number}{app.folder ? ` · ${app.folder}` : ""}</Link>
+            <Link href={`/dashboard/apps/${app.id}`} className="block text-xs text-ink-secondary hover:text-ink">v{app.version} · build #{app.build_number}{app.folder ? ` · ${app.folder}` : ""}</Link>
             <div className="flex flex-wrap gap-1">
               {app.tags?.map((tag) => (
-                <span key={tag} className="rounded-full bg-violet/10 px-2 py-0.5 text-xs text-violet">
+                <span key={tag} className="rounded-full bg-brand-subtle px-2 py-0.5 text-xs text-brand">
                   {tag}
                 </span>
               ))}
@@ -248,12 +248,12 @@ export default function AppsPage() {
               </button>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => toggleHistory(app.id)} className="flex-1 text-xs text-slate-400 underline">
+              <button onClick={() => toggleHistory(app.id)} className="flex-1 text-xs text-ink-secondary underline">
                 {historyOpenFor === app.id ? "Hide history" : "Version history"}
               </button>
               <button
                 onClick={() => setGithubPromptFor(githubPromptFor === app.id ? null : app.id)}
-                className="flex-1 text-xs text-slate-400 underline"
+                className="flex-1 text-xs text-ink-secondary underline"
               >
                 Push to GitHub
               </button>
@@ -262,27 +262,27 @@ export default function AppsPage() {
               <button onClick={() => deployWeb(app.id)} disabled={deployingId === app.id} className="btn-accent flex-1 text-xs disabled:opacity-50">{deployingId === app.id ? "Publishing…" : "Deploy web"}</button>
               <Link href="/dashboard/deployments" className="btn-outline flex-1 text-center text-xs">Releases</Link>
             </div>
-            {deployMessage[app.id] && <p className="text-xs text-slate-400">{deployMessage[app.id]}</p>}
+            {deployMessage[app.id] && <p className="text-xs text-ink-secondary">{deployMessage[app.id]}</p>}
             <div className="flex gap-2">
-              <button onClick={() => requestBuild(app.id, "ios")} className="flex-1 text-xs text-slate-400 underline">
+              <button onClick={() => requestBuild(app.id, "ios")} className="flex-1 text-xs text-ink-secondary underline">
                 Build for App Store
               </button>
-              <button onClick={() => requestBuild(app.id, "android")} className="flex-1 text-xs text-slate-400 underline">
+              <button onClick={() => requestBuild(app.id, "android")} className="flex-1 text-xs text-ink-secondary underline">
                 Build for Play Store
               </button>
             </div>
 
             {historyOpenFor === app.id && (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
-                {historyError && <p className="text-fuchsia-300">{historyError}</p>}
-                {!historyError && versions.length === 0 && <p className="text-slate-400">No prior versions yet.</p>}
+              <div className="rounded-xl border border-line bg-canvas-subtle p-3 text-xs">
+                {historyError && <p className="text-danger">{historyError}</p>}
+                {!historyError && versions.length === 0 && <p className="text-ink-secondary">No prior versions yet.</p>}
                 {versions.map((v) => (
-                  <div key={v.id} className="flex items-center justify-between border-b border-white/5 py-2 last:border-0">
+                  <div key={v.id} className="flex items-center justify-between border-b border-line py-2 last:border-0">
                     <div>
-                      <p className="text-slate-200">v{v.version_number} — {v.change_summary ?? "No summary"}</p>
-                      <p className="text-slate-500">{new Date(v.created_at).toLocaleString()}</p>
+                      <p className="text-ink">v{v.version_number} — {v.change_summary ?? "No summary"}</p>
+                      <p className="text-ink-muted">{new Date(v.created_at).toLocaleString()}</p>
                     </div>
-                    <button onClick={() => restoreVersion(app.id, v.id)} className="text-violet-300 underline">
+                    <button onClick={() => restoreVersion(app.id, v.id)} className="text-brand underline">
                       Restore
                     </button>
                   </div>
@@ -291,14 +291,14 @@ export default function AppsPage() {
             )}
 
             {githubPromptFor === app.id && (
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs space-y-2">
-                <p className="text-slate-400">
+              <div className="rounded-xl border border-line bg-canvas-subtle p-3 text-xs space-y-2">
+                <p className="text-ink-secondary">
                   Paste a{" "}
                   <a
                     href="https://github.com/settings/tokens/new"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-cyan-400 underline"
+                    className="text-info underline"
                   >
                     GitHub personal access token
                   </a>{" "}
@@ -314,7 +314,7 @@ export default function AppsPage() {
                 <button onClick={() => pushToGithub(app.id)} className="btn-accent w-full text-xs">
                   Push
                 </button>
-                {githubStatus && <p className="text-slate-400">{githubStatus}</p>}
+                {githubStatus && <p className="text-ink-secondary">{githubStatus}</p>}
               </div>
             )}
           </div>
@@ -322,7 +322,7 @@ export default function AppsPage() {
       </div>
 
       {!loading && apps.length === 0 && (
-        <p className="text-white/80">No apps yet — head to the AI Generator to create your first one.</p>
+        <p className="text-ink/80">No apps yet — head to the AI Generator to create your first one.</p>
       )}
     </div>
   );
