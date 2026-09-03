@@ -1,0 +1,69 @@
+name: CI
+
+# Runs on every pull request, and on pushes to main so the default branch
+# has its own signal rather than only being validated through PRs.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a PR makes the previous run's result irrelevant. Cancelling
+# it keeps queue times down and stops a stale red/green from being the last
+# thing a reviewer sees.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: these checks only read the code.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # package.json requires >=18.18.0. Pinned to a single LTS rather
+          # than a matrix: this is an application with one deployment
+          # target, so testing several Node versions would double the cost
+          # to catch a class of problem that cannot reach production.
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        # `npm ci` rather than `npm install`: it installs exactly what the
+        # lockfile pins and fails if package.json and the lockfile disagree,
+        # which is the check a CI run should be making.
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        # Deliberately no `env:` block. Every check here passes with zero
+        # environment variables — verified — because nothing reads Supabase,
+        # Paddle or Resend configuration at build time. Supplying dummy
+        # values would only mask the day that stops being true.
+        run: npm run build
+
+# Not run here, and why:
+#
+#   npm run lint — `next lint` with no ESLint config and no ESLint installed
+#   drops into its interactive setup, which hangs a CI runner. Adding
+#   linting means adding eslint + eslint-config-next and a config file
+#   first; that is a separate change, not something to smuggle in here.
+#
+#   The browser QA sweep (responsive, console errors, theme) needs Chromium
+#   and several minutes. It belongs in a scheduled or manually triggered
+#   workflow rather than on the critical path of every push.
